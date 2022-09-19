@@ -16,6 +16,7 @@ const Role = sequelizeInstace.define("roles", {
 
 }, {
     freezeTableName: true,
+    timestamps : false
 });
 
 module.exports = Role;

@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const EmployeeService = require("./EmployeeService");
 
-module.exports = function (Person, Employee, Role, Reserve, ServiceCategory, Service) {
+module.exports = function (Person, Employee, Role, Reserve, ServiceCategory, Service, CustomerQuantitiy) {
     
     Person.hasOne(Employee, { 
         foreignKey : {
@@ -24,9 +24,12 @@ module.exports = function (Person, Employee, Role, Reserve, ServiceCategory, Ser
         foreignKey : {
             name : "categoryId",
             type : DataTypes.INTEGER,
-            allowNull : false
-        }
+        },
+        onDelete : "CASCADE",
+        hooks : true
     }); 
+
+    // Service.belongsTo(ServiceCategory);
 
     Employee.belongsToMany( Service, {
         through :  EmployeeService
@@ -45,13 +48,37 @@ module.exports = function (Person, Employee, Role, Reserve, ServiceCategory, Ser
         }
     });
 
-    EmployeeService.hasMany( Reserve, {
+    Employee.hasMany( Reserve, {
         foreignKey : {
-            name : "EmployeeServiceId",
+            name : "employeeId",
             type : DataTypes.INTEGER,
             allowNull : false
         }
     });
 
+    Service.hasMany( Reserve, {
+        foreignKey : {
+            name : "serviceId",
+            type : DataTypes.INTEGER,
+            allowNull : false 
+        }
+    });
+
+
+    // EmployeeService.hasMany( Reserve, {
+    //     foreignKey : {
+    //         name : "EmployeeServiceId",
+    //         type : DataTypes.INTEGER,
+    //         allowNull : false
+    //     }
+    // });
+
+    Employee.hasMany( CustomerQuantitiy, {
+        foreignKey : {
+            name : "employeeId",
+            type : DataTypes.INTEGER,
+            allowNull : false
+        }
+    });
 
 }

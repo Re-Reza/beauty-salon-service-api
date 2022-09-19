@@ -3,38 +3,11 @@ const app = express();
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
 
-// const swaggerUi = require("swagger-ui-express");
-// const swaggerJsdoc = require("swagger-jsdoc");
-// const options = {
-//     definition: {
-//       openapi: "3.0.0",
-//       info: {
-//         title: "LogRocket Express API with Swagger",
-//         version: "0.1.0",
-//         description:
-//           "This is a simple CRUD API application made with Express and documented with Swagger",
-//         license: {
-//           name: "MIT",
-//           url: "https://spdx.org/licenses/MIT.html",
-//         },
-//         contact: {
-//           name: "LogRocket",
-//           url: "https://logrocket.com",
-//           email: "info@email.com",
-//         },
-//       },
-//       servers: [
-//         {
-//           url: "http://localhost:3000/api",
-//         },
-//       ],
-//     },
-//     apis: ["./modules/routes/v1/index.js"],
-//   };
+require("./modules/utilties/swaggerUi")( app );
 
-// app.use(swaggerUi.serve, swaggerUi.setup)
+
 app.use( bodyParser.urlencoded( { extended : false} ) );
-app.use( bodyParser.json({ type: "applicarion"}) );
+app.use( bodyParser.json({ type: "application/json"} ) );
 //set initial configuration
 dotenv.config({
     path: "./modules/configs/config.env"
@@ -51,8 +24,9 @@ const Role = require("./modules/models/Role");
 const Reserve = require("./modules/models/Reserve");
 const ServiceCategory = require("./modules/models/ServiceCategoey");
 const Service = require("./modules/models/Service");
+const CustomerQuantitiy = require("./modules/models/CustomerQuantitiy");
 
-require("./modules/models/setRelations") (Person, Employee, Role, Reserve, ServiceCategory, Service);
+require("./modules/models/setRelations") (Person, Employee, Role, Reserve, ServiceCategory, Service, CustomerQuantitiy);
 
 
 //set routes
@@ -61,11 +35,11 @@ const routes = require("./modules/routes/index");
 app.use("/api", routes);
 
 
-sequelize.sync( { alter : true } ).then( result => {
+sequelize.sync( { alter : false } ).then( result => {
 
     console.log("successfully connected to database");
     app.listen( process.env.PORT, () => {
-        console.log( "server is listening on port "+process.env.port );
+        console.log("server is listening on port "+process.env.port );
     } );
     
 }).catch( err => {

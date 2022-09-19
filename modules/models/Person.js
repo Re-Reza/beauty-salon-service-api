@@ -5,24 +5,23 @@ const { DataTypes } = require('sequelize');
 const Person = sequelizeInstace.define("persons", {
     fName : {
         type : DataTypes.STRING,
-        allowNull : true,
+        allowNull : false,
 
     },
     lName : {
         type : DataTypes.STRING,
-        allowNull : true,
+        allowNull : false,
         
     }, 
     username : {
         type : DataTypes.STRING,
-        allowNull : false ,  
+        allowNull : true ,  
     },
     password : {
         type : DataTypes.STRING,
         allowNull : false 
     },
     phone : {
-
         type : DataTypes.STRING(18),
         unique : {
             msg : "با این شماره موبایل قبلا ثبت نام شده"

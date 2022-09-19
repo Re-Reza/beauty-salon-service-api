@@ -2,8 +2,8 @@ const sequelizeInstace = require(setPath.configPath+"/database");
 const { DataTypes } = require('sequelize');
 
 const Reserve = sequelizeInstace.define("reserves", { 
-    date : {
-        type : DataTypes.STRING(20),
+    reserveDate : {
+        type : DataTypes.STRING(25),
         allowNull : false
     },
 
@@ -12,10 +12,14 @@ const Reserve = sequelizeInstace.define("reserves", {
         allowNull : false
     },
 
+    deleteTime : {
+        type : DataTypes.STRING(25),
+    }
 
 } , {
     freezeTableName : true,
-    paranoid : true
+    paranoid : true,
+    timestamps : false
 });
 
 module.exports = Reserve;
