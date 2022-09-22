@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 module.exports = ( req, res, next) => {
 
-    const token = req.query.token;
+    const token = req.query.token || req.body.token;
     if( token ){
         jwt.verify( token, process.env.JWT_KEY, (err, decoded) => {
             if(err) {
@@ -14,7 +14,10 @@ module.exports = ( req, res, next) => {
             }
 
             console.log(decoded);
-            req.phone = decoded;
+            const { tokenPhone, tokenPersonId} = decoded;
+            req.tokenPhone = tokenPhone;
+            req.tokenPersonId = tokenPersonId;
+            console.log("successfully token was authenticated");
             next();
         });
     }

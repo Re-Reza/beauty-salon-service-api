@@ -5,6 +5,7 @@ const Service = require(setPath.modelsPath+"/Service");
 const Reserve = require(setPath.modelsPath+"/Reserve");
 const EmployeeService = require(setPath.modelsPath+"/EmployeeService");
 const CustomerQuantitiy = require(setPath.modelsPath+"/CustomerQuantitiy");
+const Message = require(setPath.modelsPath+"/Message");
 
 module.exports = class ControllerModels {
 
@@ -16,6 +17,7 @@ module.exports = class ControllerModels {
         this.Reserve = Reserve;
         this.EmployeeService = EmployeeService;
         this.CustomerQuantitiy = CustomerQuantitiy;
+        this.Message = Message;
     }
 
 }

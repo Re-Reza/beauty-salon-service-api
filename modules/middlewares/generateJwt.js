@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-module.exports = ( userPhoneNumber ) => {
-    //set expire date?
-    return jwt.sign({ phone : userPhoneNumber }, process.env.JWT_KEY);
+module.exports = ( userPhoneNumber, personId ) => {
+    //set expire date? no!
+    return jwt.sign({ tokenPhone : userPhoneNumber, tokenPersonId : personId }, process.env.JWT_KEY);
 }

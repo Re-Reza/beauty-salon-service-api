@@ -1,7 +1,16 @@
 const { DataTypes } = require("sequelize");
-const EmployeeService = require("./EmployeeService");
 
-module.exports = function (Person, Employee, Role, Reserve, ServiceCategory, Service, CustomerQuantitiy) {
+const EmployeeService = require("./EmployeeService");
+const Person = require("./Person");
+const Employee = require("./Employee");
+const Role = require("./Role");
+const Reserve = require("./Reserve");
+const ServiceCategory = require("./ServiceCategoey");
+const Service = require("./Service");
+const CustomerQuantitiy = require("./CustomerQuantitiy");
+const Message = require("./Message");
+
+module.exports = function () {
     
     Person.hasOne(Employee, { 
         foreignKey : {
@@ -48,6 +57,10 @@ module.exports = function (Person, Employee, Role, Reserve, ServiceCategory, Ser
         }
     });
 
+    Reserve.belongsTo( Service );
+
+    Reserve.belongsTo( Employee );
+
     Employee.hasMany( Reserve, {
         foreignKey : {
             name : "employeeId",
@@ -63,7 +76,6 @@ module.exports = function (Person, Employee, Role, Reserve, ServiceCategory, Ser
             allowNull : false 
         }
     });
-
 
     // EmployeeService.hasMany( Reserve, {
     //     foreignKey : {
@@ -81,4 +93,14 @@ module.exports = function (Person, Employee, Role, Reserve, ServiceCategory, Ser
         }
     });
 
+    Person.hasMany( Message, {
+        foreignKey : {
+            name : "personId",
+            allowNull : false,
+            type : DataTypes.INTEGER
+        }
+    });
+
 }
+
+//Person, Employee, Role, Reserve, ServiceCategory, Service, CustomerQuantitiy, Message
