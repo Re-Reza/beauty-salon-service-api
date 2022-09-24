@@ -21,13 +21,17 @@ module.exports = function () {
         onDelete : "CASCADE"
     } );
 
-    Role.hasOne( Employee,{
+    Employee.belongsTo( Person );
+
+    Role.hasMany( Employee,{
         foreignKey : {
             name : "roleId",
             type : DataTypes.INTEGER,
             allowNull : false
         }
     } );
+
+    Employee.belongsTo(Role);
 
     ServiceCategory.hasMany( Service, {
         foreignKey : {
@@ -57,6 +61,13 @@ module.exports = function () {
         }
     });
 
+    Reserve.belongsTo( Person,{
+        foreignKey : {
+        name : "customerId",
+        type : DataTypes.INTEGER,
+        allowNull : false
+    } });
+
     Reserve.belongsTo( Service );
 
     Reserve.belongsTo( Employee );
@@ -77,14 +88,6 @@ module.exports = function () {
         }
     });
 
-    // EmployeeService.hasMany( Reserve, {
-    //     foreignKey : {
-    //         name : "EmployeeServiceId",
-    //         type : DataTypes.INTEGER,
-    //         allowNull : false
-    //     }
-    // });
-
     Employee.hasMany( CustomerQuantitiy, {
         foreignKey : {
             name : "employeeId",
@@ -96,8 +99,9 @@ module.exports = function () {
     Person.hasMany( Message, {
         foreignKey : {
             name : "personId",
-            allowNull : false,
-            type : DataTypes.INTEGER
+            allowNull : true,
+            type : DataTypes.INTEGER,
+            defaultValue : null
         }
     });
 

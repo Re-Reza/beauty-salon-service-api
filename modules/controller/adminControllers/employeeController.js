@@ -1,5 +1,6 @@
 const ControllerModels = require("../ControllerModels");
 const generator = require('generate-password');
+const bcryptUtils = require("../../middlewares/bcryptUtils");
 
 module.exports = new class EmployeeController extends ControllerModels{
 
@@ -16,31 +17,34 @@ module.exports = new class EmployeeController extends ControllerModels{
         try{ 
             //services is an array =>services : [ {id : }, { id : } ]
             const { nationalId, roleId, fName, lName, phone, username, services } = req.body;
-            const createdPerson = await this.Person.create( { fName, lName, username, password: randPassword ,phone}, { raw : true} ); 
-            const createdEmployee = await this.Employee.create( {roleId, nationalId}, { raw : true} );
-            createdPerson.setEmployee( createdEmployee );
-
-            const foundServices = await this.findServices( services );
-
-            //add found services to created employee 
-            await createdEmployee.addServices( foundServices )
-            //after sending data get all employees by second request
-            const newPerson = createdPerson.toJSON();
-            const newEmpoloyee = createdEmployee.toJSON();
-            res.status(200).json({
-                success : true,
-                result : {
-                    fName : newPerson.fName,
-                    lName : newPerson.lName,
-                    phone : newPerson.phone,
-                    password : newPerson.password, //show pasword to client 
-                    username : newPerson.username, 
-                    nationalId : newEmpoloyee.nationalId,
-                    roleId : newEmpoloyee.roleId,
-                    id : newEmpoloyee.id,
-                },
+            
+            bcryptUtils.hashPassword( randPassword ).then( async hashedPass =>  {
+                console.log(hashedPass)
+                const createdPerson = await this.Person.create( { fName, lName, username, password: hashedPass ,phone}, { raw : true} ); 
+                const createdEmployee = await this.Employee.create( {roleId, nationalId}, { raw : true} );
+                createdPerson.setEmployee( createdEmployee );
+    
+                const foundServices = await this.findServices( services );
+    
+                //add found services to created employee 
+                await createdEmployee.addServices( foundServices )
+                //after sending data get all employees by second request
+                const newPerson = createdPerson.toJSON();
+                const newEmpoloyee = createdEmployee.toJSON();
+                res.status(200).json({
+                    success : true,
+                    result : {
+                        fName : newPerson.fName,
+                        lName : newPerson.lName,
+                        phone : newPerson.phone,
+                        password : randPassword, //show pasword to client 
+                        username : newPerson.username, 
+                        nationalId : newEmpoloyee.nationalId,
+                        roleId : newEmpoloyee.roleId,
+                        id : newEmpoloyee.id,
+                    },
+                });
             });
-
         }
         catch( err ){
             res.status(422).json({

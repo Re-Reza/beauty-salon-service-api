@@ -7,8 +7,12 @@ const userDashboard = require(setPath.controllerPath+"/userDashControllers/userD
 router.get('/userInfo', authenticateToken , userDashboard.extractUserInfo );
 
 //for secod option of dashboard
-router.get('/userCurrentReserves', authenticateToken , userDashboard.extractCurrentUserReserves );
+router.get('/userCurrentReserves', authenticateToken , userDashboard.extracttUserCurrenReserves );
+router.get('/userReservesHistory', authenticateToken , userDashboard.extractReservesHistory );
+router.delete('/userDeleteReserve/:reserveId', authenticateToken, userDashboard.deleteReserve );
 
+router.put('/changeUserInfo', authenticateToken, userDashboard.changeUserInfo)
 
+router.get('/userMessages', authenticateToken, userDashboard.extractMessages);
 
 module.exports = router;

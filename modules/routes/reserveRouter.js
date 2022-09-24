@@ -3,6 +3,9 @@ const router = express.Router();
 
 const reserController = require(setPath.controllerPath+"/reserveController");
 
+router.get("/provideCategories", reserController.provideCategories );
+router.get("/provideServicesOfCategory/:categoryId", reserController.provideServicesOfCategory );
+
 router.post("/addReserve", reserController.addReserve);
 
 //service and date was selected and want to find employee 

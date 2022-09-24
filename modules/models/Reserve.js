@@ -8,8 +8,13 @@ const Reserve = sequelizeInstace.define("reserves", {
     },
 
     status : {
-        type : DataTypes.ENUM("done", "cancelled", "postponed", "waiting"),
+        type : DataTypes.ENUM("done", "cancelled", "finalized", "waiting"),
         allowNull : false
+    },
+
+    reserveTime : {
+        type : DataTypes.STRING(25),
+        allowNull : true
     },
 
     deleteTime : {

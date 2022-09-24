@@ -4,6 +4,41 @@ const moment = require('jalali-moment');
 
 module.exports = new class ReserveController extends ControllerModels {
 
+    provideCategories = async ( req, res) => {
+        try{
+            const cagtegories = await this.ServiceCategory.findAll({ raw: true });
+            res.status(200).json({
+                result: cagtegories,
+                success: true
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({
+                error: err,
+                success: false
+            });
+        }
+    }
+
+    provideServicesOfCategory = async ( req, res) => {
+        try{
+            const { categoryId } = req.params;
+            const services = await this.Service.findAll({ where : { categoryId }, raw:true });
+            res.status(200).json({
+                result: services,
+                success: true
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({
+                error: err,
+                success: false
+            });
+        }
+    }
+
     extractEmployeesOfDate = async ( req, res ) => {
         // const { month, day } = req.body;
         const { date, serviceId } = req.body
@@ -53,7 +88,7 @@ module.exports = new class ReserveController extends ControllerModels {
     isEmployeeValid = async ( id, date, serviceId ) => {
         try{ 
             const counter = await this.Reserve.count( { where : { employeeId : id,
-                reserveDate : date, status : { [Op.or] : ["waiting",  "postponed"], serviceId : serviceId } } } );
+                reserveDate : date, status : { [Op.or] : ["waiting",  "postponed"]}, serviceId : serviceId  } } );
             
             const isValid = counter < 2 ? true : false;
             return isValid;     
@@ -67,12 +102,13 @@ module.exports = new class ReserveController extends ControllerModels {
         try{ 
             //تاریخ و کارمندان وخدمات در دسترس کاربر قبل از قرار گرفتن در دسترسی ان اعتبار سنجی شده اند
             const { reserveDate, customerId, employeeId, serviceId} = req.body;
+            console.log(req.body);
             const m = moment();
             moment.locale('fa', { useGregorianParser: true } );
             const resrveResult = await this.Reserve.create( { reserveDate, status: "waiting", customerId, employeeId, serviceId } );
             //userId will add to  req by auth middleware
             //const { userId } = req.userId;
-            const userId = 20;
+            const userId = 1;
             await this.Message.create( { title: "ثبت رزرو", text :  `رزرو شما با موفقیت برای تاریخ ${reserveDate}ثبت گردید`, createdTime: m.format("YYYY/MM/DD"), personId : userId  } );
             res.status(200).json({
                 success : true,

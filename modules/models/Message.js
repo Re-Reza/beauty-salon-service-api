@@ -16,6 +16,15 @@ const Message = sequelizeInstace.define("messages", {
     fromAdmin : {
         type : DataTypes.BOOLEAN,
         defaultValue : false
+    },
+    messageType : {
+        type : DataTypes.TINYINT,
+        allowNull : false, 
+        defaultValue : 1   //type 1 : message only belongsto user, type 2 : message belongsto all employees, type 3 : message belongsto all users ( employees included) 
+    },
+    idRead: {
+        type : DataTypes.BOOLEAN,
+        defaultValue : false
     }
     
 }, {

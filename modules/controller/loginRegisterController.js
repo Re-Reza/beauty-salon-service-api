@@ -49,9 +49,9 @@ module.exports = new class LoginRegisterController extends ControllerModels {
     login = async ( req, res ) => { 
 
         try{
-            const foundPerson = await this.Person.findOne( { where : { phone : req.body.phone }, raw : true })
-
-            if( !foundPerson )
+            const foundPerson = await this.Person.findOne( { where : { phone : req.body.phone, }, raw : true, include: { model : this.Employee} })
+            console.log(foundPerson);
+            if( foundPerson == undefined || foundPerson == null )
             {
                 return res.status(422).json({
                     success : false,
@@ -61,9 +61,10 @@ module.exports = new class LoginRegisterController extends ControllerModels {
             
             bcrypt.compare(req.body.password, foundPerson.password, (err, result)=> {
                 if( err ) throw err;
-                console.log(result)
+
                 if( result ){
-                    const authToken = generateJwt( req.body.phone, foundPerson.id );
+        
+                    const authToken = generateJwt( req.body.phone, foundPerson.id, foundPerson['employee.id'], foundPerson['employee.roleId'] );
                     return res.status(200).json({
                         success : true,
                         result : "با موفقیت به حساب کاربری وارد شدید.",

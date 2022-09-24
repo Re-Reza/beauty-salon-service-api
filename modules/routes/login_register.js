@@ -10,13 +10,4 @@ router.post("/login", loginRegisterController.login);
 
 
 
-
-
-
-
-
-
-
-
-
 module.exports = router;

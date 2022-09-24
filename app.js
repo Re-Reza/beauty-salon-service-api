@@ -26,7 +26,7 @@ const routes = require("./modules/routes/index");
 app.use("/api", routes);
 
 
-sequelize.sync( { alter : true } ).then( result => {
+sequelize.sync({ alter : false }).then( result => {
 
     console.log("successfully connected to database");
     app.listen( process.env.PORT, () => {

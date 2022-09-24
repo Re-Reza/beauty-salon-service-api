@@ -10,7 +10,7 @@ const userDashRouter = require("./userDashRouter");
 router.use( loginRegister);
 router.use("/admin", adminRouter);
 router.use("/reserve", reserveRouter);
-router.use("/employee", employeeRouter);
+router.use("/employeeDashboard", employeeRouter);
 router.use("/userDashboard", userDashRouter);
 
 module.exports = router;
