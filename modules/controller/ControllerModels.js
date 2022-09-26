@@ -21,5 +21,4 @@ module.exports = class ControllerModels {
         this.Message = Message;
         this.Role = Role;
     }
-
 }

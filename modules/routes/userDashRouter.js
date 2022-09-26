@@ -1,10 +1,13 @@
 const router = require("express").Router();
+const multer = require("multer");
+
+const profileImgUpload = multer({ dest : "profileImgUpload" })
 
 const authenticateToken = require('../middlewares/authenticateToken'); 
 const userDashboard = require(setPath.controllerPath+"/userDashControllers/userDashboard");
 
 //for first option of dashboard
-router.get('/userInfo', authenticateToken , userDashboard.extractUserInfo );
+router.get('/userInfo', authenticateToken, userDashboard.extractUserInfo );
 
 //for secod option of dashboard
 router.get('/userCurrentReserves', authenticateToken , userDashboard.extracttUserCurrenReserves );
@@ -15,6 +18,6 @@ router.put('/changeUserInfo', authenticateToken, userDashboard.changeUserInfo)
 
 router.get('/userMessages', authenticateToken, userDashboard.extractMessages );
 
-router.post('/uploadProfileImage', authenticateToken, userDashboard.uploadProfileImage );
+router.post('/uploadProfileImage', authenticateToken, profileImgUpload.single("profileImage"), userDashboard.uploadProfileImage );
  
 module.exports = router;

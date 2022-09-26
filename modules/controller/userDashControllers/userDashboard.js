@@ -182,5 +182,4 @@ module.exports = new class UserDashboard extends ControllerModels {
             result : "s"
         });
     } 
-
 }

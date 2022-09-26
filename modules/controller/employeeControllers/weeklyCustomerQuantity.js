@@ -41,7 +41,5 @@ module.exports = new class WeeklyCustomerQuantity extends ControllerModels {
         catch( err ){
             console.log(err)
         }
-        
-
     }
 }
