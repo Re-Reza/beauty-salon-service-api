@@ -13,6 +13,8 @@ router.delete('/userDeleteReserve/:reserveId', authenticateToken, userDashboard.
 
 router.put('/changeUserInfo', authenticateToken, userDashboard.changeUserInfo)
 
-router.get('/userMessages', authenticateToken, userDashboard.extractMessages);
+router.get('/userMessages', authenticateToken, userDashboard.extractMessages );
 
+router.post('/uploadProfileImage', authenticateToken, userDashboard.uploadProfileImage );
+ 
 module.exports = router;

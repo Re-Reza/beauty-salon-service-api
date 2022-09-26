@@ -19,6 +19,11 @@ const Reserve = sequelizeInstace.define("reserves", {
 
     deleteTime : {
         type : DataTypes.STRING(25),
+    },
+
+    read : {
+        type : DataTypes.BOOLEAN,
+        defaultValue : false
     }
 
 } , {

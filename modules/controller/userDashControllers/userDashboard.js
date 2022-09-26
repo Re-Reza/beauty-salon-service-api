@@ -37,8 +37,11 @@ module.exports = new class UserDashboard extends ControllerModels {
                     id: item.id,
                     reserveDate  : item.reserveDate,
                     status : item.status,
-                    employee : item["employee.person.fName"],
-                    service : item["service.serviceTitle"]
+                    employeefName : item["employee.person.fName"],
+                    employeelName : item["employee.person.lName"],
+                    employeeId : item["employee.person.id"],
+                    service : item["service.serviceTitle"],
+                    reserveTime : item.reserveTime
                 }
             } );
 
@@ -72,6 +75,7 @@ module.exports = new class UserDashboard extends ControllerModels {
     extractReservesHistory = async ( req, res) => {
 
         const { tokenPhone, tokenPersonId} = req;
+
         this.extractReserves( tokenPersonId, ['done', 'cancelled'] ).then( reserveDate => {
             
             res.status(200).json({
@@ -116,7 +120,7 @@ module.exports = new class UserDashboard extends ControllerModels {
     }
 
     changeUserInfo = async ( req, res ) => {
-
+        console.log("inchange user info")
         //first check password i password was correct update info of user
         //define an Yup schema for validation
         try{
@@ -140,7 +144,7 @@ module.exports = new class UserDashboard extends ControllerModels {
 
                 await this.Person.update( {...req.body, password: newHashedPass ? newHashedPass : user.password}, 
                     { where : { id : tokenPersonId } });
-                
+        
                 res.status(200).json({
                     success : true,
                     result : "اطلاعات با موفقیت بروزرسانی شد"
@@ -170,7 +174,13 @@ module.exports = new class UserDashboard extends ControllerModels {
                 success : false
             })
         }
-
     }
+
+    uploadProfileImage = (req, res) => {
+        res.status(200).json({
+            success : true,
+            result : "s"
+        });
+    } 
 
 }

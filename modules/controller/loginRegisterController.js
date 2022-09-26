@@ -87,5 +87,4 @@ module.exports = new class LoginRegisterController extends ControllerModels {
         }
     }
 
-
 }

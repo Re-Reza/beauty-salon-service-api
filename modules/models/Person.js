@@ -29,7 +29,11 @@ const Person = sequelizeInstace.define("persons", {
         // unique : true
             
     },
-    //define profile in database?
+    profileImg : {
+        type : DataTypes.TEXT,
+        allowNull : true
+    }
+
 
 }, {
     freezeTableName: true,

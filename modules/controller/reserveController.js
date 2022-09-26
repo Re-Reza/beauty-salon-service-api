@@ -196,5 +196,4 @@ module.exports = new class ReserveController extends ControllerModels {
 
         return counter;
     }
-
 }
