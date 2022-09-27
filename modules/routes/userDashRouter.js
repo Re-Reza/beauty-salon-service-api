@@ -1,10 +1,8 @@
 const router = require("express").Router();
-const multer = require("multer");
-
-const profileImgUpload = multer({ dest : "profileImgUpload" })
 
 const authenticateToken = require('../middlewares/authenticateToken'); 
 const userDashboard = require(setPath.controllerPath+"/userDashControllers/userDashboard");
+const profileImgUpload  = require("../middlewares/uploadMiddleware").profileImgUpload.single("profileImage")
 
 //for first option of dashboard
 router.get('/userInfo', authenticateToken, userDashboard.extractUserInfo );
@@ -18,6 +16,27 @@ router.put('/changeUserInfo', authenticateToken, userDashboard.changeUserInfo)
 
 router.get('/userMessages', authenticateToken, userDashboard.extractMessages );
 
-router.post('/uploadProfileImage', authenticateToken, profileImgUpload.single("profileImage"), userDashboard.uploadProfileImage );
+
+//delete and update photo by setting query parameter isDelete==1 means delete 
+router.post('/uploadProfileImage', authenticateToken, (req, res, next) => {
+    
+    if(req.query.isDelete == 1) 
+    {
+        next();
+    }
+    else{
+        profileImgUpload( req, res, function( err ) {
+            if(err) {
+                console.log(err)
+                return res.status(500).json( { 
+                    success : false,
+                    error : "در بار گزاری فایل خطایی رخ داد است"
+                });
+            }
+            next();
+    
+        });
+    }
+}, userDashboard.uploadProfileImage );
  
 module.exports = router;

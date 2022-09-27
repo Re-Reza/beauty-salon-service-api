@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 
 require("./modules/utilties/swaggerUi")( app );
 
+const path = require("path");
 
 app.use( bodyParser.urlencoded( { extended : false} ) );
 app.use( bodyParser.json({ type: "application/json"} ) );
@@ -12,13 +13,16 @@ app.use( bodyParser.json({ type: "application/json"} ) );
 dotenv.config({
     path: "./modules/configs/config.env"
 });
-const path = require("./modules/utilties/path");
-global.setPath = path; 
 
+const setPath = require("./modules/utilties/path");
+global.setPath = setPath; 
+
+// public folder (which was given to express static will be ignored and must not mentioned so we can add route /publix)
+app.use("/public" ,express.static( path.join(__dirname, "public") ) );
 
 //set models 
 const sequelize = require(setPath.configPath+"/database")
-require("./modules/models/setRelations") ();
+require("./modules/models/setRelations")();
 
 
 //set routes

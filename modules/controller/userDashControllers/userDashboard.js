@@ -1,6 +1,9 @@
 const ControllerModels = require("../ControllerModels");
 const { Op } = require("sequelize");
 
+const { unlinkSync } = require("fs")
+const path = require("path");
+
 const bcryptUtils = require("../../middlewares/bcryptUtils");
 
 module.exports = new class UserDashboard extends ControllerModels {
@@ -90,7 +93,6 @@ module.exports = new class UserDashboard extends ControllerModels {
                 error : err
             });
         });
-        
     }
 
     deleteReserve = async ( req, res ) => {
@@ -176,10 +178,38 @@ module.exports = new class UserDashboard extends ControllerModels {
         }
     }
 
-    uploadProfileImage = (req, res) => {
-        res.status(200).json({
-            success : true,
-            result : "s"
-        });
+    uploadProfileImage = async (req, res) => {
+
+        try{
+            const { tokenPersonId } = req;
+            // req.file is accessible because of the middleware that we has set before this controller
+            if( !req.file && req.query.isDelete !=1 ){
+                return res.status(422).json({
+                    success : false,
+                    result : "در آپلود فایل خطایی رخ داده است"
+                });
+            }
+            // console.log(req.file)
+            const foundUser = await this.Person.findByPk( tokenPersonId, { raw : true} );
+            if( foundUser.profileImg ) {
+                const filePath = path.dirname(process.mainModule.filename)+"/"+foundUser.profileImg;
+                unlinkSync( filePath ); 
+            }
+            
+            const newProfilePath = req.file ? req.file.path.replace(/\\/g, '/') : null ;
+            await this.Person.update( { profileImg: newProfilePath }, { where : { id : tokenPersonId } } );
+            res.status(200).json({
+                success : true,
+                result : newProfilePath ? "http://localhost:"+process.env.PORT+"/"+newProfilePath : null //replace can get regex asargument
+            });
+        }
+        catch( err ) {
+            console.log(err);
+            res.status(500).json({
+                success : false,
+                error : err
+            })
+        }
     } 
+
 }

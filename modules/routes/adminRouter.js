@@ -13,5 +13,8 @@ router.delete("/deleteService", serviceController.deleteService );
 
 router.post("/addNewEmployee", employeeController.addNewEmployee );
 
+//use provideEmployeeInfo to get admin info
+
+
 
 module.exports = router; 
