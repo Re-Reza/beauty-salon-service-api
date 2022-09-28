@@ -39,7 +39,6 @@ module.exports = function () {
             type : DataTypes.INTEGER,
         },
         onDelete : "CASCADE",
-        hooks : true
     }); 
 
     // Service.belongsTo(ServiceCategory);

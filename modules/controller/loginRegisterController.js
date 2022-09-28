@@ -50,7 +50,7 @@ module.exports = new class LoginRegisterController extends ControllerModels {
 
         try{
             const foundPerson = await this.Person.findOne( { where : { phone : req.body.phone, }, raw : true, include: { model : this.Employee} })
-            console.log(foundPerson);
+            
             if( foundPerson == undefined || foundPerson == null )
             {
                 return res.status(422).json({

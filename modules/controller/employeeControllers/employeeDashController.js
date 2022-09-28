@@ -142,8 +142,9 @@ module.exports = new class EmployeeDashController extends ControllerModels {
     //reserves that belongs to employee its self
     extractReserves = async ( req, res ) => { 
         try{ 
-            const { tokenPersonId } = req;
-            const reserves = await this.Reserve.findAll({ where : { customerId : tokenPersonId }, raw : true, include : [{model : this.Employee, include : {model : this.Person}}, { model : this.Service}] });
+            // const { tokenPersonId } = req;
+            const { employeeId } = req.params;
+            const reserves = await this.Reserve.findAll({ where : { employeeId : employeeId }, raw : true, include : [{model : this.Employee, include : {model : this.Person}}, { model : this.Service}, { model : this.Person}] });
             console.log(reserves)
             const reservesData = reserves.map( item => {
                 return {
@@ -154,7 +155,11 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                     employeelName : item["employee.person.lName"],
                     employeeId : item["employee.person.id"],
                     service : item["service.serviceTitle"],
-                    reserveTime : item.reserveTime
+                    reserveTime : item.reserveTime,
+                    customerId : item['person.id'],
+                    customerFname : item['person.fName'],
+                    customerLname : item['person.lName'],
+                    customerPhone : item['person.phone']
                 }
             } );
 

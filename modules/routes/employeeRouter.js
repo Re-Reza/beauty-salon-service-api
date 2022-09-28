@@ -16,7 +16,7 @@ router.put("/editDateAndTime/:reserveId", authenticateToken, authenticateEmploye
 
 router.put("/finalizeReserve/:reserveId", authenticateToken, authenticateEmployee, employeeDashController.finalizeReserve );
 
-router.get("/extractReserves", authenticateToken, authenticateEmployee, employeeDashController.extractReserves );
+router.get("/extractReserves/:employeeId", authenticateToken, authenticateEmployee, employeeDashController.extractReserves );
 
 router.get("/messages", authenticateToken, authenticateEmployee, employeeDashController.generateMessages ); 
 

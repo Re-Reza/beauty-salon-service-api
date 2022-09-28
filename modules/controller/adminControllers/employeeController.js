@@ -17,7 +17,7 @@ module.exports = new class EmployeeController extends ControllerModels{
         try{ 
             //services is an array =>services : [ {id : }, { id : } ]
             const { nationalId, roleId, fName, lName, phone, username, services } = req.body;
-            
+            console.log(randPassword)
             bcryptUtils.hashPassword( randPassword ).then( async hashedPass =>  {
 
                 try{
