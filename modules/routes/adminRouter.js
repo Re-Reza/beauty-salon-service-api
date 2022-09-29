@@ -37,5 +37,19 @@ router.put("/editEmployeeInfo/:personId/:employeeId", authenticateToken, authent
 
 //for changing admin info must send SMS
 
+//to vhange date and time of reserve use below which belongs to emplpoyee router:
+//router.put("/editDateAndTime/:reserveId", authenticateToken, authenticateEmployee, employeeDashController.editDateAndTime );
+// router.put("/editTimeAndDate/:reserveId", authenticateToken, authenticateEmployee, admin. );
+
+router.put("/chageReserveStatus/:reserveId", authenticateToken, authenticateEmployee, admin.changeReserveStatus );
+
+router.delete("/deleteReserve/:reserveId", authenticateToken, authenticateEmployee, admin.deleteReserve );
+
+//this route is used for employee dashboard to search by date too, for employee we dont send employeeId in query
+router.get("/searchInReservesByDate", authenticateToken, authenticateEmployee, admin.searchInReservesByDate );
+
+//give wanted status in query as list
+router.get("/extractReservesByStatus", authenticateToken, authenticateEmployee, admin.extractReservesByStatus );
+router.get("/searchRservesByName", authenticateToken, authenticateEmployee, admin.searchRservesByName );
 
 module.exports = router; 

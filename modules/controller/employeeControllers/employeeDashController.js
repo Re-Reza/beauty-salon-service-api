@@ -39,7 +39,6 @@ module.exports = new class EmployeeDashController extends ControllerModels {
             const { tokenEmployeeId } = req;                                                   
             //  status  : { [Op.or] : ['waiting', 'finilized'] }  
             const transformedData = await this.extractCustomerReservesList( tokenEmployeeId, [0, 1] );
-            console.log("first");
             console.log(transformedData);
             res.status(200).json({
                 success : true,
@@ -64,11 +63,13 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                     reserveDate : item.reserveDate,
                     status : item.status,
                     serviceTitle : item['service.serviceTitle'],
+                    serviceId : item['service.id'],
                     customerId : item['person.id'],
                     customerName : item['person.fName'],
                     customerLastname : item['person.lName'],
                     customerUsername : item['person.username'],
-                    customerPhone : item['person.phone']
+                    customerPhone : item['person.phone'],
+                    reserveTime : item.reserveTime
                 }
             });
             return transformedData;
@@ -82,15 +83,16 @@ module.exports = new class EmployeeDashController extends ControllerModels {
     //should Employee setTime
     editDateAndTime = async ( req, res ) => {
         try{
-            const { tokenEmployeeId, params : { reserveId } } = req;
-
+            // const { tokenEmployeeId, params : { reserveId } } = req;
+            // const tokenEmployeeId = req.tokenEmployeeId || req.query;
+            const {reserveId} = req.params;
+            const statusCondition = req.tokenRoleID == 2 ? ["waiting", "finalized"] : ["waiting"];
             const newData = {}
             if( req.body.time )
                 newData.reserveTime = req.body.time;
             if( req.body.date )
                 newData.reserveDate = req.body.date;
-    
-            const result = await this.Reserve.update({ ...newData }, { where  : { id : reserveId,  status: "waiting" } })
+            const result = await this.Reserve.update({ ...newData }, { where  : { id : reserveId,  status: { [Op.or] : [...statusCondition] } } })
             if( result == 1) {
                 return res.status(200).json({
                     success : true,
@@ -98,6 +100,7 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                 });
             }
 
+            
             return res.status(422).json({
                 success : false,
                 error : ".ویرایش اعمال نشد"

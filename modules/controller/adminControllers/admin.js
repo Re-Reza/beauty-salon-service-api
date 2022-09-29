@@ -1,5 +1,7 @@
 const  { Op } = require("sequelize");
 
+const moment = require("jalali-moment");
+
 const ControllerModels = require("../ControllerModels");
 
 module.exports = new class Admin extends ControllerModels {
@@ -34,7 +36,6 @@ module.exports = new class Admin extends ControllerModels {
                 });
             }
         } );
-
     }
 
     // extractEmployeeServeces = async ( req, res) => {
@@ -136,5 +137,146 @@ module.exports = new class Admin extends ControllerModels {
         });
     } 
 
+    changeReserveStatus = async (req, res) => {
+        try {
+            const { params : {reserveId }, body: { status } } = req;
+            const result = await this.Reserve.update( { status }, { where : { id : reserveId } });
+            if( result == 1) {
+                return res.status(200).json({
+                    success : true,
+                    result : "تغییرات با موفقیت اعمال شد"
+                });
+            }
+
+            res.status(422).json({
+                success : false,
+                error : "اعمال تغییرات با خطا مواجه شد"
+            });
+            
+        } catch (error) {
+            res.status(500).json({
+                error : err,
+                success : false
+            });
+        }
+
+    }
+
+    deleteReserve = async (req, res) => {
+        try {
+            moment.locale("fa", { useGregorianParser : true });
+            const currentTime = moment().format("YYYY/MM/DD HH:mm:ss");
+            console.log(currentTime);
+            const result = await this.Reserve.update({deleteTime: currentTime}, { where :  {id : req.params.reserveId } });
+            if( result == 1) {
+                return res.status(200).json({
+                    success : true,
+                    result : "با موفقیت حذف شد"
+                });
+            }
+            console.log(result);
+            res.status(422).json({
+                success : false,
+                error : "خطایی رخ داده است"
+            });
+        
+        } catch (error) {
+            res.status(500).json({
+                error,
+                success : false
+            });
+        }
+    }
     
+    searchInReservesByDate = async (req, res) => {
+        try {
+
+            const { reserveDate } = req.query;
+            const employeeId = req.query.employeeId || req.tokenEmployeeId;
+            console.log(employeeId);
+            console.log(reserveDate);            
+            const condition = {
+                reserveDate, 
+            };
+            if( employeeId )
+            {
+                condition.employeeId = employeeId;
+            }
+            console.log(condition);
+            const secarchResult = await this.Reserve.findAll({ where : { ...condition, status : { [Op.or] : ["cancelled", "done"] } }, raw : true});
+            console.log(secarchResult);
+            res.status(200).json({
+                success : true,
+                result : secarchResult
+            });
+
+        } catch (err) {
+            res.status(500).json({
+                success : false,
+                error : err
+            });            
+        }
+    }
+
+    extractReservesByStatus = async (req, res) => {
+        
+        try {
+            const { reserveStatus } = req.query;
+            // console.log(JSON.parse(reserveStatus) );
+            const reserves = await this.Reserve.findAll({ where : { status : { [Op.or] : JSON.parse(reserveStatus) }, deleteTime : null }, 
+            raw : true, include : [{ model: this.Person }, { model: this.Employee, include : { model : this.Person } }, { model: this.Service }] });
+            const transformedData = reserves.map( item => {
+                return {
+                    id : item.id,
+                    reserveDate : item.reserveDate,
+                    reserveTime : item.reserveTime,
+                    employeeId : item['employee.id'],
+                    employeeFname : item['employee.person.fName'],
+                    employeeLname : item['employee.person.lName'],
+                    emplloyePhone : item['employee.person.phone'],
+                    status : item.status,
+                    serviceTitle : item['service.serviceTitle'],
+                    serviceId : item['service.id'],
+                    customerId : item['person.id'],
+                    customerName : item['person.fName'],
+                    customerLastname : item['person.lName'],
+                    customerUsername : item['person.username'],
+                    customerPhone : item['person.phone']
+                }
+            });
+            res.status(200).json({
+                success : true,
+                result : transformedData
+            });
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                error,
+                success : false
+            });
+        }
+    }
+
+    searchReservesByName = async (req, res) => {
+        //if enetered phone search on phone and entered name search on name 
+        // ? onEmployee = & value ==> value can be phone or name  
+        try{
+            const { isEmployee, value } = req.query;
+            let foundItem;
+            if(isEmployee == 1)
+            {
+                this.Reserve.findAll({ where : { }} )
+            }
+            else {
+                this.Reserve.findAll({ where : { } });
+            }
+        }   
+        catch( err ){
+            res.status(500).jdon({
+                success : false,
+                error : err
+            });
+        }
+    }
 }
