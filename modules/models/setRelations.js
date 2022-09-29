@@ -9,6 +9,7 @@ const ServiceCategory = require("./ServiceCategoey");
 const Service = require("./Service");
 const CustomerQuantitiy = require("./CustomerQuantitiy");
 const Message = require("./Message");
+const MessageReaders = require("./MessageReaders");
 
 module.exports = function () {
     
@@ -95,15 +96,23 @@ module.exports = function () {
         }
     });
 
-    Person.hasMany( Message, {
-        foreignKey : {
-            name : "personId",
-            allowNull : true,
-            type : DataTypes.INTEGER,
-            defaultValue : null
-        }
-    });
+    // Person.hasMany( Message, {
+    //     foreignKey : {
+    //         name : "personId",
+    //         allowNull : true,
+    //         type : DataTypes.INTEGER,
+    //         defaultValue : null
+    //     }
+    // });
 
+    Message.hasMany( MessageReaders, {
+        foreignKey : {
+            name : "messageId",
+            allowNull : false,
+            type : DataTypes.INTEGER,
+        },
+        onDelete : "CASCADE",
+    });
 }
 
 //Person, Employee, Role, Reserve, ServiceCategory, Service, CustomerQuantitiy, Message

@@ -10,22 +10,21 @@ const Message = sequelizeInstace.define("messages", {
         allowNull : false 
     },
     createdTime : {
-        type : DataTypes.STRING(25),
+        type : DataTypes.STRING(50),
         allowNull : false
     },
-    fromAdmin : {
-        type : DataTypes.BOOLEAN,
-        defaultValue : false
-    },
-    messageType : {
+    messageType : { //type 1 just for employees, type 2 just for customer, type 3 for all users of site
         type : DataTypes.TINYINT,
         allowNull : false, 
-        defaultValue : 1   //type 1 : message only belongsto user, type 2 : message belongsto all employees, type 3 : message belongsto all users ( employees included) 
     },
-    idRead: {
-        type : DataTypes.BOOLEAN,
-        defaultValue : false
+    deleteTime : {
+        type : DataTypes.STRING(50),
+        defaultValue : null
     }
+    // idRead: {
+    //     type : DataTypes.BOOLEAN,
+    //     defaultValue : false
+    // }
     
 }, {
     freezeTableName : true, 

@@ -160,24 +160,6 @@ module.exports = new class UserDashboard extends ControllerModels {
         }
     } 
 
-    extractMessages = async (req, res) => {
-        try{
-            const { tokenPersonId } = req;
-            const messages = await this.Message.findAll({ where : { [Op.or] : { personId: tokenPersonId, messageType : 3}}, raw : true });
-            res.status(200).json({
-                success: true,
-                result : messages
-            });
-        }
-        catch(err){
-            console.log(err);
-            res.status(500).json({
-                error : err,
-                success : false
-            })
-        }
-    }
-
     uploadProfileImage = async (req, res) => {
 
         try{
@@ -211,5 +193,25 @@ module.exports = new class UserDashboard extends ControllerModels {
             })
         }
     } 
+
+    extractMessages = async (req, res) => {
+        try{
+            const { tokenPersonId } = req;
+            // const messages = await this.Message.findAll({ where : { [Op.or] : { personId: tokenPersonId, messageType : 3}}, raw : true });
+            const m = this.Message.findAll({ where : { messageType : { [Op.or] : [2, 3]}}, include: [ { model : this.MessageReaders } ], raw : true });
+            console.log(m);
+            res.status(200).json({
+                success: true,
+                result : messages
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({
+                error : err,
+                success : false
+            })
+        }
+    }
 
 }

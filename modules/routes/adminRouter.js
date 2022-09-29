@@ -8,6 +8,7 @@ const authenticateEmployee = require('../middlewares/authenticateEmployee');
 const serviceController = require(setPath.controllerPath+"/adminControllers/serviceController");
 const employeeController = require(setPath.controllerPath+"/adminControllers/employeeController");
 const admin = require(setPath.controllerPath+"/adminControllers/admin");
+const adminMessage = require(setPath.controllerPath+"/adminControllers/adminMessage");
 
 //ایا با توجه به اینکه این ای پی ای ها در داشپورد هستند و برای دسترسی به داشپورد هم اعتبار سنجی میشود آیا لازم است پیش از استفاده از هر ای ئی ای اعتبار سنجی شود؟
 
@@ -50,6 +51,11 @@ router.get("/searchInReservesByDate", authenticateToken, authenticateEmployee, a
 
 //give wanted status in query as list
 router.get("/extractReservesByStatus", authenticateToken, authenticateEmployee, admin.extractReservesByStatus );
-router.get("/searchRservesByName", authenticateToken, authenticateEmployee, admin.searchRservesByName );
+// router.get("/searchRservesByName", authenticateToken, authenticateEmployee, admin.searchReservesByName );
+
+
+router.post("/sendMessage", authenticateToken, authenticateEmployee, adminMessage.sendMessage );
+
+router.delete("/deleteMessage/:messageId", authenticateToken, authenticateEmployee, adminMessage.deleteMessage)
 
 module.exports = router; 
