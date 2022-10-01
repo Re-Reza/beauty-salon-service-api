@@ -51,7 +51,7 @@ router.get("/searchInReservesByDate", authenticateToken, authenticateEmployee, a
 
 //give wanted status in query as list
 router.get("/extractReservesByStatus", authenticateToken, authenticateEmployee, admin.extractReservesByStatus );
-// router.get("/searchRservesByName", authenticateToken, authenticateEmployee, admin.searchReservesByName );
+router.get("/searchReservesByNameOrPhone", authenticateToken, authenticateEmployee, admin.searchReservesByNameOrPhone );
 
 
 router.post("/sendMessage", authenticateToken, authenticateEmployee, adminMessage.sendMessage );

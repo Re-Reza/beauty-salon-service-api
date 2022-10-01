@@ -164,7 +164,7 @@ module.exports = new class UserDashboard extends ControllerModels {
 
         try{
             const { tokenPersonId } = req;
-            // req.file is accessible because of the middleware that we has set before this controller
+            // req.file is accessible because of the middleware that we has beeb setted before this controller
             if( !req.file && req.query.isDelete !=1 ){
                 return res.status(422).json({
                     success : false,
@@ -196,13 +196,51 @@ module.exports = new class UserDashboard extends ControllerModels {
 
     extractMessages = async (req, res) => {
         try{
-            const { tokenPersonId } = req;
-            // const messages = await this.Message.findAll({ where : { [Op.or] : { personId: tokenPersonId, messageType : 3}}, raw : true });
-            const m = this.Message.findAll({ where : { messageType : { [Op.or] : [2, 3]}}, include: [ { model : this.MessageReaders } ], raw : true });
-            console.log(m);
+
+            const { tokenPersonId, tokenEmployeeId, tokenRoleID } = req;
+            // const m = await this.Message.findAll({ where : { messageType : { [Op.or] : [2, 3]}}, include: [ { model : this.MessageReaders} ], raw : true });
+            let reserveMessages;
+            let sqlCondition;
+            //for Employees 
+            if( tokenEmployeeId && tokenRoleID !=2 ) 
+            {
+                reserveMessages = await this.Reserve.findAll({ where : { employeeId : tokenEmployeeId, deleteTime : null }, raw : true, include : [ {model : this.Person, attributes:["id", "fName", "lName", "phone"]}, {model : this.Service}] });
+                sqlCondition = [1, 3];
+            }
+            else if( tokenEmployeeId && tokenRoleID == 2 ){ //for admin 
+                reserveMessages = await this.Reserve.findAll({ where : { employeeId : tokenEmployeeId, deleteTime : null }, raw : true, include : [ {model : this.Person}, {model : this.Employee,  attributes:["id"], include : { model : this.Person, attributes:["id", "fName", "lName", "phone"]} }, {model : this.Service}] });
+                sqlCondition = [1, 2, 3];
+            }
+            else{ //for customers
+                reserveMessages = await this.Reserve.findAll({ where : { customerId : tokenPersonId, deleteTime : null }, 
+                raw : true, include : [ {model : this.Employee, attributes:["id"], include : { model : this.Person, attributes:["id", "fName", "lName", "phone"] } }, {model : this.Service}] });
+                sqlCondition = [2, 3];
+            }
+
+            let messages = await this.Message.findAll({ where : { messageType : { [Op.or] : sqlCondition }, deleteTime : null}, raw : true });
+            const readMessages = await this.MessageReaders.findAll({ where : { personId : tokenPersonId }, raw : true});
+            
+            const unreadMessages = {
+                systemMessages : [],
+                adminMessages : []
+            };
+            
+            messages.forEach( message => {
+                const isValid = this.checkMessage(message.id, readMessages, "messageId");
+                if( isValid ) 
+                    unreadMessages.adminMessages.push(message);
+            }); 
+            
+            reserveMessages.forEach( message => {
+                const isValid = this.checkMessage(message.id, readMessages, "reserveMessageId");
+                if( isValid ) 
+                    unreadMessages.systemMessages.push(message);
+            });
+
+            console.log(unreadMessages);
             res.status(200).json({
                 success: true,
-                result : messages
+                result : unreadMessages
             });
         }
         catch(err){
@@ -212,6 +250,11 @@ module.exports = new class UserDashboard extends ControllerModels {
                 success : false
             })
         }
+    }
+
+    checkMessage( messageId, readMessages, key ){
+        const foundItem = readMessages.find( item => item[key] == messageId );
+        return foundItem ? false : true;
     }
 
 }

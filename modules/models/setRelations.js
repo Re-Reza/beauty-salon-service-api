@@ -108,11 +108,21 @@ module.exports = function () {
     Message.hasMany( MessageReaders, {
         foreignKey : {
             name : "messageId",
-            allowNull : false,
+            allowNull : true,
             type : DataTypes.INTEGER,
         },
         onDelete : "CASCADE",
     });
+
+    Reserve.hasMany( MessageReaders, {
+        foreignKey : {
+            name : "reserveMessageId",
+            allowNull : true,
+            type : DataTypes.INTEGER,
+        },
+        onDelete : "CASCADE",
+    })
+    // MessageReaders.belongsTo(MessageReaders);
 }
 
 //Person, Employee, Role, Reserve, ServiceCategory, Service, CustomerQuantitiy, Message

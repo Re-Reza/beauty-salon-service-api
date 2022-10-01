@@ -14,8 +14,8 @@ router.delete('/userDeleteReserve/:reserveId', authenticateToken, userDashboard.
 
 router.put('/changeUserInfo', authenticateToken, userDashboard.changeUserInfo)
 
+//this route can be use for customers, employees and admin
 router.get('/userMessages', authenticateToken, userDashboard.extractMessages );
-
 
 //delete and update photo by setting query parameter isDelete==1 means delete 
 router.post('/uploadProfileImage', authenticateToken, (req, res, next) => {

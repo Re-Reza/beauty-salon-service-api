@@ -4,7 +4,7 @@ module.exports = new class AdminController extends ControllerModels {
 
     addNewEmployee = async (req, res) => {
         try{
-        //must validata body data 
+            //must validata body data 
             console.log(req.body)
             const result = await this.Employee.create(req.body);
             res.status(200).json({

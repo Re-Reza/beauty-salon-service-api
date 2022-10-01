@@ -1,4 +1,4 @@
-const  { Op } = require("sequelize");
+const  { Op, fn, col, where } = require("sequelize");
 
 const moment = require("jalali-moment");
 
@@ -258,22 +258,50 @@ module.exports = new class Admin extends ControllerModels {
         }
     }
 
-    searchReservesByName = async (req, res) => {
-        //if enetered phone search on phone and entered name search on name 
-        // ? onEmployee = & value ==> value can be phone or name  
+    searchReservesByNameOrPhone = async (req, res) => {
+        //if enetered phone search on phone and entered name search on name   
         try{
-            const { isEmployee, value } = req.query;
-            let foundItem;
-            if(isEmployee == 1)
-            {
-                this.Reserve.findAll({ where : { }} )
+            const { isEmployee, searchValue } = req.query;
+            console.log(isEmployee, searchValue);
+            let searchResult;
+            if( isEmployee == 1 ) {
+                searchResult = await this.Employee.findAll({  
+                    include : [ {model : this.Person, where : {
+                        [Op.or] : [ 
+                            {
+                                phone : { [Op.like] : `${searchValue}%` } 
+                            },
+                            where(fn('concat', col('fName'),' ', col('lName')), {
+                                [Op.like]: `${searchValue}%`
+                            })
+                        ]} }], raw:true 
+                });
             }
-            else {
-                this.Reserve.findAll({ where : { } });
+            else{ 
+                //optimize this part by sequelize options ?!
+                const allUsers = await this.Person.findAll({ 
+                    where : { [Op.or] : [
+                        {
+                            phone : { [Op.like] : `${searchValue}%` } 
+                        },
+                        where(fn('concat', col('fName'),' ', col('lName')), {
+                            [Op.like]: `${searchValue}%`
+                        })
+                    ]}  
+                    , raw :true, include : [{model : this.Employee, required: false,require : false}]
+                });
+                searchResult = allUsers.filter( user => user['employee.id'] == null )
             }
+            console.log(searchResult);
+
+            res.status(200).json({
+                success : true,
+                result : "testing"
+            });
         }   
         catch( err ){
-            res.status(500).jdon({
+            console.log(err);
+            res.status(500).json({
                 success : false,
                 error : err
             });

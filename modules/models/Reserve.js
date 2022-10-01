@@ -21,10 +21,10 @@ const Reserve = sequelizeInstace.define("reserves", {
         type : DataTypes.STRING(80),
     },
 
-    read : {
-        type : DataTypes.BOOLEAN,
-        defaultValue : false
-    }
+    // read : {
+    //     type : DataTypes.BOOLEAN,
+    //     defaultValue : false
+    // }
 
 } , {
     freezeTableName : true,
