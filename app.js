@@ -2,10 +2,19 @@ const express = require('express');
 const app = express();
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 require("./modules/utilties/swaggerUi")( app );
 
 const path = require("path");
+
+app.use( cors( {
+    //valid origins that are allowed to request api
+    origin: ['http://localhost:3000'],
+    credentials:true,
+    optionSuccessStatus:200,
+    methods : ['GET', 'POST', 'PUT', 'DELETE']
+}) );
 
 app.use( bodyParser.urlencoded( { extended : false} ) );
 app.use( bodyParser.json({ type: "application/json"} ) );

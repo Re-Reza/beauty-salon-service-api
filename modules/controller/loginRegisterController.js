@@ -7,13 +7,16 @@ const generateJwt = require("../middlewares/generateJwt")
 module.exports = new class LoginRegisterController extends ControllerModels { 
 
     register = (req, res) => {
-    
+        console.log("in register")
         registerSchema.validate( req.body, { abortEarly: false }).then( validatedData => {
+            const { fName, lName, phone, password } = req.body; 
 
-            bcrypt.hash(req.body.password, 10).then( hashed =>  {
+            bcrypt.hash(password, 10).then( hashed =>  {
                 
-                const data={
-                    ...validatedData,
+                const data = {
+                    fName,
+                    lName,
+                    phone,
                     password : hashed
                 }
 
@@ -27,6 +30,7 @@ module.exports = new class LoginRegisterController extends ControllerModels {
                     });
     
                 }).catch( err => {
+                    console.log(err);
                     res.status(422).json({
                         error : err.errors,
                         success : false
@@ -47,10 +51,11 @@ module.exports = new class LoginRegisterController extends ControllerModels {
     }
 
     login = async ( req, res ) => { 
-
+     
         try{
+
             const foundPerson = await this.Person.findOne( { where : { phone : req.body.phone, }, raw : true, include: { model : this.Employee} })
-            
+
             if( foundPerson == undefined || foundPerson == null )
             {
                 return res.status(422).json({
@@ -71,7 +76,7 @@ module.exports = new class LoginRegisterController extends ControllerModels {
                         authToken 
                     });
                 }
-
+                console.log("first")
                 return res.status(422).json({
                     success : false,
                     error : "شماره موبایل یا رمز عبور وارد شده صحیح نیست"
@@ -80,7 +85,8 @@ module.exports = new class LoginRegisterController extends ControllerModels {
             })
         }
         catch( err ) {
-            res.json({
+            console.log(err)
+            res.status(500).json({
                 success : false,
                 error : err  
             });

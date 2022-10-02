@@ -6,5 +6,6 @@ module.exports = object().shape({
     phone : string().required("شماره تلفن همراه الزامی است").trim(),
     password : string().required("رمز عبور الزامی است").min(4, "رمز عبور باید حداقل شامل ۴ کاراکتر باشد").trim(),
     // confirmPassword : string().oneOf([ ref('password'), null], "رمز عبور و تکرار آن مطابقت ندارد").trim()
+    confirmPassword : string().oneOf([ ref('password'), null], "رمز عبور و تکرار آن مطابقت ندارد")
 });
 

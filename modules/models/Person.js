@@ -6,17 +6,16 @@ const Person = sequelizeInstace.define("persons", {
     fName : {
         type : DataTypes.STRING,
         allowNull : false,
-
     },
     lName : {
         type : DataTypes.STRING,
         allowNull : false,
         
     }, 
-    username : {
-        type : DataTypes.STRING,
-        allowNull : true ,  
-    },
+    // username : {
+    //     type : DataTypes.STRING,
+    //     allowNull : true ,  
+    // },
     password : {
         type : DataTypes.STRING,
         allowNull : false 
@@ -25,15 +24,12 @@ const Person = sequelizeInstace.define("persons", {
         type : DataTypes.STRING(18),
         unique : {
             msg : "با این شماره موبایل قبلا ثبت نام شده"
-        },
-        // unique : true
-            
+        },   
     },
     profileImg : {
         type : DataTypes.TEXT,
         allowNull : true
     }
-
 
 }, {
     freezeTableName: true,
