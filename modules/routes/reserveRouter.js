@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const reserController = require(setPath.controllerPath+"/reserveController");
+const authenticateToken = require('../middlewares/authenticateToken');
 
 router.get("/provideCategories", reserController.provideCategories );
 router.get("/provideServicesOfCategory/:categoryId", reserController.provideServicesOfCategory );

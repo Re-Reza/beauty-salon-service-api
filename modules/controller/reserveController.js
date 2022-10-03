@@ -98,6 +98,7 @@ module.exports = new class ReserveController extends ControllerModels {
         }
     }
 
+    //زمان تایید رزرو یک بار دیگر اطلاعاتی ارسالی برسی شود که مثلا کارمد فضای خالی در ان روز دارد یا نه
     addReserve = async ( req, res ) => {
         try{ 
             //تاریخ و کارمندان وخدمات در دسترس کاربر قبل از قرار گرفتن در دسترسی ان اعتبار سنجی شده اند
@@ -126,32 +127,59 @@ module.exports = new class ReserveController extends ControllerModels {
     }
 
     extractEmployeesOfService = async ( req, res ) => {
-        const { serviceId } = req.query;
-        const employeesOfService = await this.Service.findAll({ where : { id : serviceId }, include : [ { model: this.Employee } ], raw : true });
-        // console.log(employeesOfService)
-        const employees = [];
-        employeesOfService.forEach( (item, index) => {
-
-            this.Person.findByPk(item['employees.personId'], { raw : true}).then( person => {
-          
-                employees.push({
-                    fName : person.fName,
-                    lName : person.lName,
-                    phone : person.phone,
-                    personId : person.id,
-                    username : person.username,
-                    employeeId : item['employees.id']
-                });
-
-                if( index == employeesOfService.length-1){
-                    console.log(employees)
-                    res.status(200).json({
-                        success : true,
-                        result : employees
-                    });
-                }
+        try{
+            const { serviceId } = req.query;
+            const employeesOfService = await this.Service.findAll({ attributes:[] ,where : { id : serviceId }, 
+                include : [ { model: this.Employee, attributes:['id', 'roleId'], 
+                include :{model:  this.Person,  attributes:['id', 'fName', 'lName', 'phone', 'profileImg']} } ], raw : true });
+            
+            let transformedData = employeesOfService.map( item => ({
+                employeeId : item['employees.id'],
+                personId: item['employees.person.id'],
+                phone : item['employees.person.phone'],
+                fName : item['employees.person.fName'],
+                lName : item['employees.person.lName'],
+                profileImg : item['employees.person.profileImg'],
+                roleId : item['employees.roleId']
+            }) );
+            if(transformedData.length == 1 && transformedData[0].fName == null)
+                transformedData = [];
+            // console.log(transformedData);
+            res.status(200).json({
+                success : true,
+                result : transformedData
+            })
+        }
+        catch(err) {
+            console.log(err)
+            res.status(500).json({
+                error : err,
+                success : false
             });
-        });
+        }
+        // const employees = [];
+        // employeesOfService.forEach( (item, index) => {
+
+        //     this.Person.findByPk(item['employees.personId'], { raw : true}).then( person => {
+          
+        //         employees.push({
+        //             fName : person.fName,
+        //             lName : person.lName,
+        //             phone : person.phone,
+        //             personId : person.id,
+        //             username : person.username,
+        //             employeeId : item['employees.id']
+        //         });
+
+        //         if( index == employeesOfService.length-1){
+        //             console.log(employees)
+        //             res.status(200).json({
+        //                 success : true,
+        //                 result : employees
+        //             });
+        //         }
+        //     });
+        // });
         
         //can include child table for result of parent, but cant include parent table in result of child
         // const e = await this.Person.findOne( { where : { id :10 }, include : { model : this.Employee } } );
@@ -159,32 +187,38 @@ module.exports = new class ReserveController extends ControllerModels {
 
     }
 
+
     extractEmployeeTimeWork = async ( req, res ) => {
   
         const { employeeId, serviceId } = req.query;
-        // res.json("this is a employee");
-
+    
         const m = moment();
         moment.locale('fa', { useGregorianParser: true } );
-        m.add(5, 'day');
         console.log(m.format("YYYY/M/D") );
+
         const {count, rows} = await this.Reserve.findAndCountAll( { where : {employeeId, serviceId }, raw: true });
-        
+
         const weekFreeTimeWork = [];
-        console.log( new Date().getMilliseconds() );
         for( let i=0; i<7; i++ ) {
             const result = this.countReserves( rows, m.format("YYYY/M/D") );
+            if(result < 2){ //get number from related table
+                weekFreeTimeWork.push( m.format("DD") );
+            }
             m.add(1, "day");
-            weekFreeTimeWork.push( result < 2 ? true : false );
         }
         console.log(weekFreeTimeWork);
-
-        console.log(new Date().getMilliseconds() );
+        res.status(200).json({
+            result : {
+                freeDays : weekFreeTimeWork,
+                start : new Date().setDate( new Date().getDate() ),
+                end : new Date().setDate( new Date().getDate()+6)
+            },
+            success : true
+        });
 
     } 
 
     countReserves = ( reserves , date ) => {
-
         let counter = 0; 
         reserves.forEach( reserve => {
     
