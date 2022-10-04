@@ -8,8 +8,8 @@ const profileImgUpload  = require("../middlewares/uploadMiddleware").profileImgU
 router.get('/userInfo', authenticateToken, userDashboard.extractUserInfo );
 
 //for secod option of dashboard
-router.get('/userCurrentReserves', authenticateToken , userDashboard.extracttUserCurrenReserves );
-router.get('/userReservesHistory', authenticateToken , userDashboard.extractReservesHistory );
+router.get('/userReserves', authenticateToken , userDashboard.provideRerserveList );
+// router.get('/userReservesHistory', authenticateToken , userDashboard.extractReservesHistory );
 router.delete('/userDeleteReserve/:reserveId', authenticateToken, userDashboard.deleteReserve );
 
 router.put('/changeUserInfo', authenticateToken, userDashboard.changeUserInfo)

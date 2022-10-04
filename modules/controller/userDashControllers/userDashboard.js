@@ -13,13 +13,13 @@ module.exports = new class UserDashboard extends ControllerModels {
             //these parameters was added from authenticateToken 
             const { tokenPhone, tokenPersonId} = req;
             //extract img path from database
-            const foundUser = await this.Person.findByPk(tokenPersonId, { attributes:["id","fName", "lName", "username", "phone"] ,raw : true} );
+            const foundUser = await this.Person.findByPk(tokenPersonId, { attributes:["id","fName", "lName", "profileImg", "phone"] ,raw : true} );
             console.log(foundUser);
             res.status(200).json({
                 success: true,
                 result : foundUser
             });
- 
+
         }
         catch(err){
             console.log(err);
@@ -34,7 +34,8 @@ module.exports = new class UserDashboard extends ControllerModels {
         
         try{ 
             //has important tip : including parent table in child table became possible because of child.belongsTo( Parent )
-            const reserves = await this.Reserve.findAll({ where : { customerId : userId, status : { [Op.or] : [ ...reserveType] } }, include : [{model : this.Employee, include : {model : this.Person}}, { model : this.Service}], raw : true}); 
+            const reserves = await this.Reserve.findAll({ where : { customerId : userId, status : { [Op.or] : [ ...reserveType] } }, 
+                include : [{model : this.Employee, include : {model : this.Person}}, { model : this.Service}], raw : true}); 
             const reservesData = reserves.map( item => {
                 return {
                     id: item.id,
@@ -56,10 +57,10 @@ module.exports = new class UserDashboard extends ControllerModels {
         }
     }
 
-    extracttUserCurrenReserves = ( req, res ) => {
+    provideRerserveList = ( req, res ) => {
         const { tokenPhone, tokenPersonId} = req;
-        
-        this.extractReserves( tokenPersonId, ['waiting']).then( reserveDate => {
+        const statusCodition = req.query.isHistory == 1 ? ['done', 'cancelled'] : ['waiting', 'finalized'];  
+        this.extractReserves( tokenPersonId, statusCodition).then( reserveDate => {
             res.status(200).json({
                 success : true,
                 result : reserveDate
@@ -74,26 +75,21 @@ module.exports = new class UserDashboard extends ControllerModels {
         });
     }
     
-
-    extractReservesHistory = async ( req, res) => {
-
-        const { tokenPhone, tokenPersonId} = req;
-
-        this.extractReserves( tokenPersonId, ['done', 'cancelled'] ).then( reserveDate => {
-            
-            res.status(200).json({
-                success : true,
-                result : reserveDate
-            });
-
-        }).catch( err =>{ 
-            console.log(err);
-            res.status(500).json({
-                success : false,
-                error : err
-            });
-        });
-    }
+    // extractReservesHistory = async ( req, res) => {
+    //     const { tokenPhone, tokenPersonId} = req;
+    //     this.extractReserves( tokenPersonId, ['done', 'cancelled'] ).then( reserveDate => {
+    //         res.status(200).json({
+    //             success : true,
+    //             result : reserveDate
+    //         });
+    //     }).catch( err =>{ 
+    //         console.log(err);
+    //         res.status(500).json({
+    //             success : false,
+    //             error : err
+    //         });
+    //     });
+    // }
 
     deleteReserve = async ( req, res ) => {
    
