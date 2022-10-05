@@ -96,7 +96,7 @@ module.exports = new class UserDashboard extends ControllerModels {
         try {
             const { params: {reserveId}, tokenPersonId } = req;  
             //if item was not finalized user has delete option 
-            const result = await this.Reserve.destroy({ where : { id : reserveId, customerId : tokenPersonId, status : "waiting" } })
+            const result = await this.Reserve.update({status : "cancelled"} ,{ where : { id : reserveId, customerId : tokenPersonId, status : "waiting", deleteTime : null } })
             if(result == 0) {
                 return res.status(422).json({
                     success : false,
@@ -105,7 +105,7 @@ module.exports = new class UserDashboard extends ControllerModels {
             }
             res.status(200).json({
                 success : true,
-                result : "با موفقیت حذف شد"
+                result : "با موفقیت کنسل شد"
             });
         }
         catch( err) {
@@ -118,12 +118,11 @@ module.exports = new class UserDashboard extends ControllerModels {
     }
 
     changeUserInfo = async ( req, res ) => {
-        console.log("inchange user info")
         //first check password i password was correct update info of user
         //define an Yup schema for validation
         try{
             const { tokenPersonId } = req;
-            const { password } = req.body;
+            const { password, fName, lName, phone} = req.body;
 
             const user = await this.Person.findByPk( tokenPersonId, { raw : true} );
             bcryptUtils.validatePassword(password, user.password, async ( result )=>{
@@ -136,11 +135,17 @@ module.exports = new class UserDashboard extends ControllerModels {
                 }
 
                 let newHashedPass;
-                if(req.body.newPassword){
+                if(req.body.newPassword && req.body.newPassword.trim !="" ){
                     newHashedPass = await bcryptUtils.hashPassword( req.body.newPassword );
                 }
-
-                await this.Person.update( {...req.body, password: newHashedPass ? newHashedPass : user.password}, 
+                
+                const newData = {
+                    fName : fName.trim() == ""? user.fName : fName,
+                    lName : lName.trim() == ""? user.lName : lName,
+                    phone : phone.trim() == ""? user.phone : phone
+                }
+    
+                await this.Person.update( {...newData, password: newHashedPass ? newHashedPass : user.password}, 
                     { where : { id : tokenPersonId } });
         
                 res.status(200).json({
@@ -152,7 +157,11 @@ module.exports = new class UserDashboard extends ControllerModels {
 
         }
         catch( err ){
-            console.log(err)
+            console.log(err);
+            res.status(500).json({
+                error: err,
+                success: false
+            })
         }
     } 
 
@@ -176,9 +185,10 @@ module.exports = new class UserDashboard extends ControllerModels {
             
             const newProfilePath = req.file ? req.file.path.replace(/\\/g, '/') : null ;
             await this.Person.update( { profileImg: newProfilePath }, { where : { id : tokenPersonId } } );
+            //"http://localhost:"+process.env.PORT+"/"
             res.status(200).json({
                 success : true,
-                result : newProfilePath ? "http://localhost:"+process.env.PORT+"/"+newProfilePath : null //replace can get regex asargument
+                result : newProfilePath ? newProfilePath : null //replace can get regex asargument
             });
         }
         catch( err ) {

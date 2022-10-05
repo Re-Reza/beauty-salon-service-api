@@ -11,7 +11,7 @@ const imageStorage = multer.diskStorage({
 
 const profileImageFilter = ( req, file, callback ) =>{
 
-    if( file.mimetype === "image/png" || file.mimetype === "image/jpeg" ){
+    if( file.mimetype === "image/png" || file.mimetype === "image/jpeg" || file.mimetype === "image/jpg" ){
         ///null is for error it means that we have to error
         callback(null, true); //true means acceptable file type
     }
@@ -26,7 +26,6 @@ const profileImgUpload = multer({
     // limits : {
     //     fieldSize : 1024*1024 //sutable size for profile image
     // }
-
 });
 
 module.exports = {
