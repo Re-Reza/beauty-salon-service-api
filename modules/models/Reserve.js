@@ -13,7 +13,7 @@ const Reserve = sequelizeInstace.define("reserves", {
     },
 
     reserveTime : {
-        type : DataTypes.STRING(25),
+        type : DataTypes.STRING(150),
         allowNull : true
     },
 

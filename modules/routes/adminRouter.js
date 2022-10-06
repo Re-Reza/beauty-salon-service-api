@@ -10,7 +10,6 @@ const employeeController = require(setPath.controllerPath+"/adminControllers/emp
 const admin = require(setPath.controllerPath+"/adminControllers/admin");
 const adminMessage = require(setPath.controllerPath+"/adminControllers/adminMessage");
 
-//ایا با توجه به اینکه این ای پی ای ها در داشپورد هستند و برای دسترسی به داشپورد هم اعتبار سنجی میشود آیا لازم است پیش از استفاده از هر ای ئی ای اعتبار سنجی شود؟
 
 //LCV9c9 => admin password
 // 9900 => admin phone 
@@ -23,7 +22,7 @@ router.post("/addNewEmployee", employeeController.addNewEmployee );
 
 //use provideEmployeeInfo to get admin info
 
-router.get("/allEmployeesList",  authenticateToken, authenticateEmployee, admin.employeesList );
+router.get("/allEmployeesList", authenticateToken, authenticateEmployee, admin.employeesList );
 
 // router.get("/provideEmployeeSerives/:employeeId", authenticateToken, authenticateEmployee , admin.extractEmployeeServeces );
 
@@ -31,7 +30,7 @@ router.get("/proviceServices", authenticateToken, authenticateEmployee, admin.ex
 
 router.get("/provideRoles", authenticateToken, authenticateEmployee, admin.extractRoles );
 
-router.put("/editEmployeeInfo/:personId/:employeeId", authenticateToken, authenticateEmployee, admin.editEmployeeInfo );
+router.put("/editEmployeeInfo/:personId", authenticateToken, authenticateEmployee, admin.editEmployeeInfo );
 
 //use router.get("/extractReserves/:employeeId", authenticateToken, authenticateEmployee, employeeDashController.extractReserves ); 
 //to get reserves of employee 

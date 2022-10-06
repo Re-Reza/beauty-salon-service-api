@@ -14,6 +14,7 @@ module.exports = new class UserDashboard extends ControllerModels {
             const { tokenPhone, tokenPersonId} = req;
             //extract img path from database
             const foundUser = await this.Person.findByPk(tokenPersonId, { attributes:["id","fName", "lName", "profileImg", "phone"] ,raw : true} );
+            
             console.log(foundUser);
             res.status(200).json({
                 success: true,

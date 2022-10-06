@@ -97,10 +97,12 @@ module.exports = new class Admin extends ControllerModels {
 
     editEmployeeInfo = async ( req, res) => {
         try{
-            const{ personId, employeeId } = req.params;
+            const{ personId } = req.params;
+
             // console.log(req.body);
             //all of varible must have value if they are not suppoesed to change must have default valu
-            const { fName, lName, phone, nationalId, newServices, roleId } = req.body;
+            console.log(req.body.newData)
+            const { fName, lName, phone, nationalId, newServices, roleId } = req.body.newData;
 
             const foundPerson = await this.Person.findOne( { where : { id : personId } });
             foundPerson.phone = phone;
@@ -110,13 +112,22 @@ module.exports = new class Admin extends ControllerModels {
            
             const employee = await foundPerson.getEmployee();
             employee.nationalId = nationalId;
-            employee.roleId = roleId;
+            // employee.roleId = roleId;
             await employee.save();
-           
-            const foundServices = await this.findServices( newServices );
+            let foundServices = [];
+            if(newServices.length > 0)
+            {
+                foundServices = await this.findServices( newServices );
+                
+            }
             employee.setServices( foundServices );
+
+            res.status(200).json({
+                success : true,
+            })
         }
         catch(err){
+            console.log(err);
             res.status(500).json({
                 error : err,
                 success : false
@@ -222,8 +233,9 @@ module.exports = new class Admin extends ControllerModels {
         
         try {
             const { reserveStatus } = req.query;
+            console.log(reserveStatus)
             // console.log(JSON.parse(reserveStatus) );
-            const reserves = await this.Reserve.findAll({ where : { status : { [Op.or] : JSON.parse(reserveStatus) }, deleteTime : null }, 
+            const reserves = await this.Reserve.findAll({ where : { status : { [Op.or] : reserveStatus }, deleteTime : null }, 
             raw : true, include : [{ model: this.Person }, { model: this.Employee, include : { model : this.Person } }, { model: this.Service }] });
             const transformedData = reserves.map( item => {
                 return {

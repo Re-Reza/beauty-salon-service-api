@@ -6,8 +6,22 @@ module.exports = new class EmployeeDashController extends ControllerModels {
     provideEmployeeInfo = async ( req, res ) => {
 
         try{
-            const { tokenPersonId } = req;
-            const employee = await this.Person.findByPk(tokenPersonId ,{ attributes : ['id', 'fName', 'lName', 'username', 'phone', 'employee.nationalId', 'employee.roleId'], raw : true, include : {model : this.Employee, include : {model: this.Role}} });
+            const { tokenPersonId, tokenEmployeeId } = req;
+            const employee = await this.Person.findByPk(tokenPersonId ,{ attributes : ['id', 'fName', 'profileImg','lName', 'phone', 'employee.nationalId', 'employee.roleId'], raw : true, include : {model : this.Employee, include : {model: this.Role}} });
+            const services = await this.Employee.findAll({ where : { id : tokenEmployeeId}, include: [ { model : this.Service } ],raw :true })
+
+            let employeeServices;
+            if(services[0]['services.id'] == null)
+                employeeServices = []
+            else{
+                employeeServices = services.map( item => {
+                    return {
+                        serviceId : item['services.id'],
+                        serviceTitle : item['services.serviceTitle'],
+                        serviceCategoryId : item['services.categoryId'] 
+                    }
+                });
+            }
 
             res.status(200).json({
                 success : true,
@@ -15,12 +29,13 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                     id : employee.id,
                     employeeId : employee['employee.id'],
                     fName : employee.fName,
+                    profileImg : employee.profileImg,
                     lName : employee.lName,
-                    username : employee.username,
                     phone : employee.phone,
                     nationalId : employee.nationalId,
                     roleId : employee.roleId,
-                    roleTitle : employee['employee.role.roleTitle']
+                    roleTitle : employee['employee.role.roleTitle'],
+                    services : employeeServices
                 }
             });
         }
@@ -36,13 +51,20 @@ module.exports = new class EmployeeDashController extends ControllerModels {
     extractCustomerList = async ( req, res ) => {
 
         try { 
-            const { tokenEmployeeId } = req;                                                   
+            let employeeId;
+            if(req.query.employeeId)
+                employeeId = req.query.employeeId
+            else
+                employeeId = req.query.tokenEmployeeId; 
+                                            
             //  status  : { [Op.or] : ['waiting', 'finilized'] }  
-            const transformedData = await this.extractCustomerReservesList( tokenEmployeeId, [0, 1] );
+            const transformedData = await this.extractCustomerReservesList( employeeId, [0, 1] );
             console.log(transformedData);
             res.status(200).json({
                 success : true,
-                result : transformedData
+                result : transformedData,
+                start : new Date().setDate( new Date().getDate() ),
+                end : new Date().setDate( new Date().getDate()+6 )
             });
         }
         catch( err ){
@@ -56,7 +78,9 @@ module.exports = new class EmployeeDashController extends ControllerModels {
 
     extractCustomerReservesList = async (tokenEmployeeId, readValues ) => {
         try{
-            const reserves = await this.Reserve.findAll({ where: { employeeId : tokenEmployeeId, deleteTime : null, read : { [Op.or] : [...readValues] } }, raw : true, include : [{ model : this.Service}, {model : this.Person}] });
+            //read : { [Op.or] : [...readValues] } was wrriten for messages
+            const reserves = await this.Reserve.findAll({ where: { employeeId : tokenEmployeeId, deleteTime : null }, raw : true, include : [{ model : this.Service}, {model : this.Person}] });
+            // console.log(reserves)
             const transformedData = reserves.map( item => {
                 return {
                     id : item.id,
@@ -67,7 +91,6 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                     customerId : item['person.id'],
                     customerName : item['person.fName'],
                     customerLastname : item['person.lName'],
-                    customerUsername : item['person.username'],
                     customerPhone : item['person.phone'],
                     reserveTime : item.reserveTime
                 }
@@ -87,16 +110,18 @@ module.exports = new class EmployeeDashController extends ControllerModels {
             // const tokenEmployeeId = req.tokenEmployeeId || req.query;
             const {reserveId} = req.params;
             const statusCondition = req.tokenRoleID == 2 ? ["waiting", "finalized"] : ["waiting"];
-            const newData = {}
-            if( req.body.time )
-                newData.reserveTime = req.body.time;
-            if( req.body.date )
-                newData.reserveDate = req.body.date;
-            const result = await this.Reserve.update({ ...newData }, { where  : { id : reserveId,  status: { [Op.or] : [...statusCondition] } } })
+            // const newData = {}
+            // if( req.body.time )
+            //     newData.reserveTime = req.body.time;
+            // if( req.body.date )
+            //     newData.reserveDate = req.body.date;
+
+            const newData = req.body.newTime;
+            const result = await this.Reserve.update({ reserveTime : newData, status : "finalized" }, { where  : { id : reserveId,  status: { [Op.or] : [...statusCondition] } } })
             if( result == 1) {
                 return res.status(200).json({
                     success : true,
-                    result : ".باموفقیت ویرایش اعمال شد"
+                    result : newData
                 });
             }
 
@@ -147,7 +172,7 @@ module.exports = new class EmployeeDashController extends ControllerModels {
         try{ 
             // const { tokenPersonId } = req;
             const { employeeId } = req.params;
-            const reserves = await this.Reserve.findAll({ where : { employeeId : employeeId }, raw : true, include : [{model : this.Employee, include : {model : this.Person}}, { model : this.Service}, { model : this.Person}] });
+            const reserves = await this.Reserve.findAll({ where : { customerId : employeeId }, raw : true, include : [{model : this.Employee, include : {model : this.Person}}, { model : this.Service}, { model : this.Person}] });
             console.log(reserves)
             const reservesData = reserves.map( item => {
                 return {
