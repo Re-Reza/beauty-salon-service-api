@@ -17,14 +17,15 @@ module.exports = new class EmployeeController extends ControllerModels{
         try{ 
             //services is an array =>services : [ {id : }, { id : } ]
             const { nationalId, roleId, fName, lName, phone, services } = req.body;
-            console.log(randPassword)
-            bcryptUtils.hashPassword( randPassword ).then( async hashedPass =>  {
+            // console.log(randPassword)
+            
+            bcryptUtils.hashPassword( "1234" ).then( async hashedPass =>  {
 
                 try{
                     const createdPerson = await this.Person.create( { fName, lName, password: hashedPass ,phone}, { raw : true} ); 
-                    const createdEmployee = await this.Employee.create( {roleId, nationalId}, { raw : true} );
+                    const createdEmployee = await this.Employee.create( {roleId:1, nationalId}, { raw : true} );
                     createdPerson.setEmployee( createdEmployee );
-                    console.log("berfor")
+                 
                     if(services.length>0)
                     {
                         const foundServices = await this.findServices( services );
@@ -32,13 +33,11 @@ module.exports = new class EmployeeController extends ControllerModels{
                     }
         
                     //add found services to created employee 
-                    console.log("here")
-                    
+                             
                     //after sending data get all employees by second request
-                    console.log("here1")
                     const newPerson = createdPerson.toJSON();
                     const newEmpoloyee = createdEmployee.toJSON();
-                    console.log("arrived")
+            
                     res.status(200).json({
                         success : true,
                         result : {

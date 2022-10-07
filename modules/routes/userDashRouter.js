@@ -39,4 +39,6 @@ router.post('/uploadProfileImage', authenticateToken, (req, res, next) => {
     }
 }, userDashboard.uploadProfileImage );
  
+router.get("/generalInfo", authenticateToken, userDashboard.generalInfo)
+
 module.exports = router;

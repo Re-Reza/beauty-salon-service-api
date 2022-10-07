@@ -1,10 +1,10 @@
 const ControllerModels = require("../ControllerModels");
 const { Op } = require("sequelize");
-
 const { unlinkSync } = require("fs")
 const path = require("path");
 
 const bcryptUtils = require("../../middlewares/bcryptUtils");
+const moment = require("jalali-moment");
 
 module.exports = new class UserDashboard extends ControllerModels {
 
@@ -14,7 +14,7 @@ module.exports = new class UserDashboard extends ControllerModels {
             const { tokenPhone, tokenPersonId} = req;
             //extract img path from database
             const foundUser = await this.Person.findByPk(tokenPersonId, { attributes:["id","fName", "lName", "profileImg", "phone"] ,raw : true} );
-            
+        
             console.log(foundUser);
             res.status(200).json({
                 success: true,
@@ -262,6 +262,30 @@ module.exports = new class UserDashboard extends ControllerModels {
     checkMessage( messageId, readMessages, key ){
         const foundItem = readMessages.find( item => item[key] == messageId );
         return foundItem ? false : true;
+    }
+
+    generalInfo = async (req, res) => {
+        try{
+            const { tokenPersonId } = req;
+            moment.locale("fa", { useGregorianParser : true });
+           
+            const data = await this.Person.findByPk( tokenPersonId, { raw : true, attributes : ["profileImg", "fName", "lName", "id"]})
+            console.log(data)
+            res.status(200).json({
+                result : {
+                    ...data,
+                    date : moment().format("YYYY/MM/DD")
+                },
+                success : true
+            })
+        }
+        catch( err ){
+            console.log(err);
+            res.status(500).json({
+                error : err,
+                success : false
+            })
+        }
     }
 
 }

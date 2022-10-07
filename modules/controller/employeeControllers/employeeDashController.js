@@ -35,7 +35,7 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                     nationalId : employee.nationalId,
                     roleId : employee.roleId,
                     roleTitle : employee['employee.role.roleTitle'],
-                    services : employeeServices
+                    services : employeeServices,
                 }
             });
         }
@@ -115,9 +115,15 @@ module.exports = new class EmployeeDashController extends ControllerModels {
             //     newData.reserveTime = req.body.time;
             // if( req.body.date )
             //     newData.reserveDate = req.body.date;
-
-            const newData = req.body.newTime;
-            const result = await this.Reserve.update({ reserveTime : newData, status : "finalized" }, { where  : { id : reserveId,  status: { [Op.or] : [...statusCondition] } } })
+            let newData={};
+            if(req.body.newTime)
+                newData.reserveTime = req.body.newTime
+            if( req.body.newStatus)
+                newData.status = req.body.newStatus
+            else
+                newData.status ="finalized";
+            console.log(newData);
+            const result = await this.Reserve.update({ ...newData}, { where  : { id : reserveId,  status: { [Op.or] : [...statusCondition] } } })
             if( result == 1) {
                 return res.status(200).json({
                     success : true,

@@ -52,6 +52,7 @@ router.get("/searchInReservesByDate", authenticateToken, authenticateEmployee, a
 router.get("/extractReservesByStatus", authenticateToken, authenticateEmployee, admin.extractReservesByStatus );
 router.get("/searchReservesByNameOrPhone", authenticateToken, authenticateEmployee, admin.searchReservesByNameOrPhone );
 
+router.get("/searchEmployee", authenticateToken, authenticateEmployee, admin.searchEmployee );
 
 router.post("/sendMessage", authenticateToken, authenticateEmployee, adminMessage.sendMessage );
 

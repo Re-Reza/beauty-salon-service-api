@@ -9,7 +9,12 @@ module.exports = new class Admin extends ControllerModels {
     employeesList = async (req, res) => {
         const employees = await this.Employee.findAll({ where : { roleId : { [Op.not] : [2] } }, 
             include : [ {model : this.Person}, {model: this.Role} ] });
-    
+            console.log(employees);
+        if(employees.length == 0)
+            return res.status(200).json({
+                result : [],
+                success : true
+            });
         const transformedData = [];
         employees.forEach( async (item, index) => {
             const employeeServices = await item.getServices();
@@ -290,7 +295,6 @@ module.exports = new class Admin extends ControllerModels {
                 });
             }
             else{ 
-                //optimize this part by sequelize options ?!
                 const allUsers = await this.Person.findAll({ 
                     where : { [Op.or] : [
                         {
@@ -311,6 +315,73 @@ module.exports = new class Admin extends ControllerModels {
                 result : "testing"
             });
         }   
+        catch( err ){
+            console.log(err);
+            res.status(500).json({
+                success : false,
+                error : err
+            });
+        }
+    }
+
+    searchEmployee = async (req, res) => {
+        try{
+            const { data } = req.query;
+            console.log(data)
+            const allUsers = await this.Person.findAll({ 
+                where : { [Op.or] : [
+                    {
+                        phone : { [Op.like] : `${data}%` } 
+                    },
+                    where(fn('concat', col('fName'),' ', col('lName')), {
+                        [Op.like]: `${data}%`
+                    })
+                ]}  
+                , raw :true, include : [{model : this.Employee, include:{model:this.Service},attributes : ["id", "nationalId", "roleId"]}], attributes : ["id", "fName", "lName", "phone", "profileImg"]
+            });
+            const searchedEmployees = allUsers.filter( user => user['employee.id'] != null );
+            console.log(searchedEmployees)
+            let searchResult=[];
+            searchedEmployees.forEach( item => {
+                const foundItem = searchResult.find( s => s.employeeId == item['employee.id']);
+                if( !foundItem ){    
+                    const currentEmployee = searchedEmployees.filter( em => em.id == item.id);
+                    let services = [];
+                    const emData = {
+                        employeeId : item['employee.id'],
+                        nationalId : item['employee.nationalId'],
+                        fName : item.fName,
+                        lName : item.lName,
+                        phone : item.phone,
+                        profileImg : item.profileImg
+                    };
+                    if(currentEmployee.length == 0 && currentEmployee['employee.services.serviceTitle'] == null) 
+                    {
+                        searchResult.push({
+                            ...emData,
+                            services
+                        });
+                    }
+                    else{
+                        currentEmployee.forEach(i => {
+                            services.push({
+                                serviceTitle:i['employee.services.serviceTitle'],
+                                serviceId : i['employee.services.id']
+                            });
+                        });
+                        searchResult.push({
+                            ...emData,
+                            services
+                        })
+                    }
+                }
+            });      
+            console.log(searchResult);
+            res.status(200).json({
+                success : true,
+                result : searchResult
+            }); 
+        }
         catch( err ){
             console.log(err);
             res.status(500).json({
