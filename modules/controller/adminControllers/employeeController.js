@@ -6,16 +6,13 @@ module.exports = new class EmployeeController extends ControllerModels{
 
  //passport js
     addNewEmployee = async (req, res) => {
-        // this.Employee
         const randPassword = generator.generate({
             length : 6,
             numbers : true
         });
-        //must hash password
 
         //roleId can not be an id that doesn't exists in roles table
         try{ 
-            //services is an array =>services : [ {id : }, { id : } ]
             const { nationalId, roleId, fName, lName, phone, services } = req.body;
             // console.log(randPassword)
             

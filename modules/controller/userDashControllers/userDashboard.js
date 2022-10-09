@@ -205,49 +205,82 @@ module.exports = new class UserDashboard extends ControllerModels {
         try{
 
             const { tokenPersonId, tokenEmployeeId, tokenRoleID } = req;
-            // const m = await this.Message.findAll({ where : { messageType : { [Op.or] : [2, 3]}}, include: [ { model : this.MessageReaders} ], raw : true });
-            let reserveMessages;
             let sqlCondition;
+            let reserveConditon;
             //for Employees 
             if( tokenEmployeeId && tokenRoleID !=2 ) 
             {
-                reserveMessages = await this.Reserve.findAll({ where : { employeeId : tokenEmployeeId, deleteTime : null }, raw : true, include : [ {model : this.Person, attributes:["id", "fName", "lName", "phone"]}, {model : this.Service}] });
                 sqlCondition = [1, 3];
+                reserveConditon = { 
+                    employeeId : tokenEmployeeId,
+                };
             }
             else if( tokenEmployeeId && tokenRoleID == 2 ){ //for admin 
-                reserveMessages = await this.Reserve.findAll({ where : { employeeId : tokenEmployeeId, deleteTime : null }, raw : true, include : [ {model : this.Person}, {model : this.Employee,  attributes:["id"], include : { model : this.Person, attributes:["id", "fName", "lName", "phone"]} }, {model : this.Service}] });
                 sqlCondition = [1, 2, 3];
+                reserveConditon = {}
             }
             else{ //for customers
-                reserveMessages = await this.Reserve.findAll({ where : { customerId : tokenPersonId, deleteTime : null }, 
-                raw : true, include : [ {model : this.Employee, attributes:["id"], include : { model : this.Person, attributes:["id", "fName", "lName", "phone"] } }, {model : this.Service}] });
                 sqlCondition = [2, 3];
+                reserveConditon = {
+                    customerId : tokenPersonId,
+                }
             }
 
-            let messages = await this.Message.findAll({ where : { messageType : { [Op.or] : sqlCondition }, deleteTime : null}, raw : true });
-            const readMessages = await this.MessageReaders.findAll({ where : { personId : tokenPersonId }, raw : true});
+            const reserveMessages = await this.Reserve.findAll({ where : { ...reserveConditon, deleteTime : null }, 
+                include : [ 
+                { model : this.Service, attributes:["id", "serviceTitle"]}, { model : this.Person, attributes:["fName", "lName", "phone"]},
+                { model : this.Employee, attributes:[], include : { model : this.Person, attributes:["fName", "lName", "phone"] } } 
+            ]
+            , raw : true });
+
+            const transformedReserveMessages = reserveMessages.map(item => ({
+                reserveId : item.id,
+                reserveDate : item.reserveDate,
+                status : item.status,
+                reserveTime : item.reserveTime,
+                customerId : item.customerId,
+                employeeId : item.employeeId,
+                serviceTitle : item['service.serviceTitle'],
+                serviceId : item["service.id"],
+                customerName : item['person.fName']+" "+item['person.lName'],
+                customerPhone: item['person.phone'],
+                employeeName : item['employee.person.fName']+" "+item['employee.person.lName'],
+                employeePhone : item['employee.person.phone']
+            }) );
+
+            // console.log(transformedReserveMessages)
+
+            // const messagesFromAdmin = await this.Message.findAll({ where : { messageType : { [Op.or] : sqlCondition }}, 
+                // include : [ { model : this.MessageReaders, as : "messageReaders" ,  through : { where : { personId : { [Op.not] : 16 }  } }  }], raw : true });
+        
+            // const messagesFromAdmin = await this.Message.findAll({ where : { messageType : { [Op.or] : sqlCondition } }, 
+            //  include : [ { model : this.MessageReaders, where : {'$messageReaders.personId$' : { [Op.not] : 16} } ,required : false  }], raw : true });
+        
+            const messagesFromAdmin = await this.Message.findAll({ where : { messageType : { [Op.or] : sqlCondition } }, raw : true });
+
+            const readMessages = await this.MessageReaders.findAll({ where : { personId : tokenPersonId }, raw : true });
             
-            const unreadMessages = {
-                systemMessages : [],
-                adminMessages : []
-            };
-            
-            messages.forEach( message => {
-                const isValid = this.checkMessage(message.id, readMessages, "messageId");
-                if( isValid ) 
-                    unreadMessages.adminMessages.push(message);
-            }); 
-            
-            reserveMessages.forEach( message => {
-                const isValid = this.checkMessage(message.id, readMessages, "reserveMessageId");
-                if( isValid ) 
-                    unreadMessages.systemMessages.push(message);
+            let allMessages = [...transformedReserveMessages, ...messagesFromAdmin ];
+
+            readMessages.forEach( item => {
+                let key1;
+                let key2;
+                if( item.reserveMessageId )
+                {
+                    key1 = 'reserveMessageId';
+                    key2 = 'reserveId';
+                }
+                else    
+                {    
+                    key1 = 'messageId';
+                    key2 = 'id';
+                }
+                allMessages = allMessages.filter( message => message[key2] != item[key1]);
             });
 
-            console.log(unreadMessages);
             res.status(200).json({
                 success: true,
-                result : unreadMessages
+                result : allMessages
             });
         }
         catch(err){
@@ -255,13 +288,31 @@ module.exports = new class UserDashboard extends ControllerModels {
             res.status(500).json({
                 error : err,
                 success : false
-            })
+            });
         }
     }
 
-    checkMessage( messageId, readMessages, key ){
-        const foundItem = readMessages.find( item => item[key] == messageId );
-        return foundItem ? false : true;
+    readMessage = async (req, res) => {
+
+        try{
+
+            const { tokenPersonId, body : { isReserve, messageId} } = req;
+
+            const data = ( isReserve == 1 ? { reserveMessageId : messageId } : { messageId } )
+                console.log(data)
+            await this.MessageReaders.create({ personId : tokenPersonId, ...data });
+
+            res.status(200).json({
+                success : true,
+            });
+        }
+        catch( error){
+            console.log(error);
+            res.status(500).json({
+                success : false,
+                error 
+            });
+        }
     }
 
     generalInfo = async (req, res) => {

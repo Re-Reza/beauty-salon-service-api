@@ -327,7 +327,7 @@ module.exports = new class Admin extends ControllerModels {
     searchEmployee = async (req, res) => {
         try{
             const { data } = req.query;
-            console.log(data)
+            // console.log(data)
             const allUsers = await this.Person.findAll({ 
                 where : { [Op.or] : [
                     {
@@ -340,7 +340,7 @@ module.exports = new class Admin extends ControllerModels {
                 , raw :true, include : [{model : this.Employee, include:{model:this.Service},attributes : ["id", "nationalId", "roleId"]}], attributes : ["id", "fName", "lName", "phone", "profileImg"]
             });
             const searchedEmployees = allUsers.filter( user => user['employee.id'] != null );
-            console.log(searchedEmployees)
+            // console.log(searchedEmployees)
             let searchResult=[];
             searchedEmployees.forEach( item => {
                 const foundItem = searchResult.find( s => s.employeeId == item['employee.id']);

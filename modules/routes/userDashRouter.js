@@ -2,6 +2,7 @@ const router = require("express").Router();
 
 const authenticateToken = require('../middlewares/authenticateToken'); 
 const userDashboard = require(setPath.controllerPath+"/userDashControllers/userDashboard");
+const authenticateEmployee =require("../middlewares/authenticateEmployee");
 const profileImgUpload  = require("../middlewares/uploadMiddleware").profileImgUpload.single("profileImage")
 
 //for first option of dashboard
@@ -15,7 +16,19 @@ router.delete('/userDeleteReserve/:reserveId', authenticateToken, userDashboard.
 router.put('/changeUserInfo', authenticateToken, userDashboard.changeUserInfo)
 
 //this route can be use for customers, employees and admin
-router.get('/userMessages', authenticateToken, userDashboard.extractMessages );
+router.get('/userMessages', authenticateToken, (req, res, next) => {
+    if( req.tokenEmployeeId )
+        authenticateEmployee(req, res, next);
+    else
+        next();
+}, userDashboard.extractMessages );
+
+router.post("/readMessage", authenticateToken, (req, res, next) => {
+    if( req.tokenEmployeeId )
+        authenticateEmployee(req, res, next);
+    else
+        next(); 
+}, userDashboard.readMessage );
 
 //delete and update photo by setting query parameter isDelete==1 means delete 
 router.post('/uploadProfileImage', authenticateToken, (req, res, next) => {

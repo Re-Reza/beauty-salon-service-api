@@ -121,7 +121,17 @@ module.exports = function () {
             type : DataTypes.INTEGER,
         },
         onDelete : "CASCADE",
-    })
+    });
+
+    Person.hasMany( MessageReaders, {
+        foreignKey : {
+            name : "personId",
+            allowNull : false,
+            type : DataTypes.INTEGER,
+        },
+        onDelete : "CASCADE"
+    });
+    
     // MessageReaders.belongsTo(MessageReaders);
 }
 
