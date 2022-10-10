@@ -51,15 +51,15 @@ module.exports = new class EmployeeDashController extends ControllerModels {
     extractCustomerList = async ( req, res ) => {
 
         try { 
+            
             let employeeId;
-            if(req.query.employeeId)
+            if(req.query.employeeId != 'null' && req.query.employeeId != 'undefined' )
                 employeeId = req.query.employeeId
             else
-                employeeId = req.query.tokenEmployeeId; 
+                employeeId = req.tokenEmployeeId; 
                                             
-            //  status  : { [Op.or] : ['waiting', 'finilized'] }  
             const transformedData = await this.extractCustomerReservesList( employeeId, [0, 1] );
-            console.log(transformedData);
+            // console.log(transformedData);
             res.status(200).json({
                 success : true,
                 result : transformedData,
@@ -79,8 +79,9 @@ module.exports = new class EmployeeDashController extends ControllerModels {
     extractCustomerReservesList = async (tokenEmployeeId, readValues ) => {
         try{
             //read : { [Op.or] : [...readValues] } was wrriten for messages
+            console.log("top")
             const reserves = await this.Reserve.findAll({ where: { employeeId : tokenEmployeeId, deleteTime : null }, raw : true, include : [{ model : this.Service}, {model : this.Person}] });
-            // console.log(reserves)
+            console.log(reserves)
             const transformedData = reserves.map( item => {
                 return {
                     id : item.id,
@@ -131,7 +132,6 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                 });
             }
 
-            
             return res.status(422).json({
                 success : false,
                 error : ".ویرایش اعمال نشد"

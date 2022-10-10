@@ -336,10 +336,11 @@ module.exports = new class Admin extends ControllerModels {
                     where(fn('concat', col('fName'),' ', col('lName')), {
                         [Op.like]: `${data}%`
                     })
-                ]}  
+                ], }  
                 , raw :true, include : [{model : this.Employee, include:{model:this.Service},attributes : ["id", "nationalId", "roleId"]}], attributes : ["id", "fName", "lName", "phone", "profileImg"]
             });
-            const searchedEmployees = allUsers.filter( user => user['employee.id'] != null );
+
+            const searchedEmployees = allUsers.filter( user => user['employee.id'] != null && user['employee.roleId'] != 2);
             // console.log(searchedEmployees)
             let searchResult=[];
             searchedEmployees.forEach( item => {
