@@ -58,4 +58,6 @@ router.post("/sendMessage", authenticateToken, authenticateEmployee, adminMessag
 
 router.delete("/deleteMessage/:messageId", authenticateToken, authenticateEmployee, adminMessage.deleteMessage)
 
+router.get('/allAdminMessages', authenticateToken, authenticateEmployee, adminMessage.provideAllMessages );
+
 module.exports = router; 

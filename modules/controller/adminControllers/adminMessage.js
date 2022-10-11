@@ -31,7 +31,6 @@ module.exports = new class AdminMessage extends ControllerModels {
             
             // moment.locale("fa", { useGregorianParser : true });
             // const currentTime = moment().format("YYYY/MM/DD HH:mm:ss");
-
             // const result = await this.Message.update({deleteTime: currentTime}, { where :  {id : req.params.messageId } });
             const result = await this.Message.destroy({ where : { id : req.params.messageId } });
             if( result == 1) {
@@ -47,6 +46,24 @@ module.exports = new class AdminMessage extends ControllerModels {
             });
             
         } catch (error) {
+            res.status(500).json({
+                success : false,
+                error
+            });
+        }
+    }
+
+    provideAllMessages = async (req, res) => {
+        try{
+            const messages = await this.Message.findAll({ raw : true });
+            console.log(messages);
+            res.status(200).json({
+                success : true,
+                result : messages
+            })
+        }   
+        catch(error) {
+            console.log(error);
             res.status(500).json({
                 success : false,
                 error
