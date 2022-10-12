@@ -384,7 +384,7 @@ module.exports = new class Admin extends ControllerModels {
             }); 
         }
         catch( err ){
-            console.log(err);
+            // console.log(err);
             res.status(500).json({
                 success : false,
                 error : err

@@ -28,19 +28,17 @@ module.exports = new class AdminController extends ControllerModels {
             },
             services : [] services related to send serviceCategoey
         }*/
-        const { serviceCategoey : {id, categoryTitle}, services } = req.body;
+        const { serviceCategory : {id, categoryTitle}, service } = req.body;
+        console.log(service)
         if( id ){
-            console.log("here1");
             try{
                 const foundService = await this.ServiceCategory.findOne( { where : {id: id}});
-                const createdServices = await this.Service.bulkCreate( services );
-                await foundService.addServices(createdServices); 
+                // const createdServices = await this.Service.bulkCreate( services );
+                const createdService = await this.Service.create( {serviceTitle : service});
+                await foundService.addServices(createdService); 
                 res.status(200).json({
                     success : true,
-                    result : {
-                        foundService,
-                        createdServices
-                    }
+                    result : createdService
                 });
             }
             catch( err ){
@@ -54,13 +52,15 @@ module.exports = new class AdminController extends ControllerModels {
         else{
             try { 
                 const createdCategory = await this.ServiceCategory.create({ categoryTitle });
-                const createdServices = await this.Service.bulkCreate( services );
-                createdCategory.addServices(createdServices);
+                const createdService = await this.Service.create( { serviceTitle : service } );
+                const r = await createdCategory.addServices(createdService);
+                console.log("first");
+                console.log(r.toJSON());
                 res.status(200).json({
                     success : true,
                     result : {
                         createdCategory,
-                        createdServices
+                        createdService
                     }
                 });
             }   
@@ -99,4 +99,27 @@ module.exports = new class AdminController extends ControllerModels {
         }
     } 
 
+    provideCategoriesServices = async (req, res) => {
+        try { 
+            const result = await this.ServiceCategory.findAll({ include : {model : this.Service} });
+
+            const transformedData = result.map( item => {
+                    return item.toJSON();
+            });
+
+            res.status(200).json({
+                result : transformedData,
+                success : true
+            });
+        }
+        catch( error )
+        {
+            console.log(err)
+            res.status(500).json({
+                success : false,
+                error : err
+            });
+        }
+    }
+    
 }

@@ -60,4 +60,6 @@ router.delete("/deleteMessage/:messageId", authenticateToken, authenticateEmploy
 
 router.get('/allAdminMessages', authenticateToken, authenticateEmployee, adminMessage.provideAllMessages );
 
+router.get('/provideCategoriesServices', authenticateToken, authenticateEmployee, serviceController.provideCategoriesServices);
+
 module.exports = router; 
