@@ -207,10 +207,11 @@ module.exports = new class Admin extends ControllerModels {
     searchInReservesByDate = async (req, res) => {
         try {
 
-            const { reserveDate } = req.query;
-            const employeeId = req.query.employeeId || req.tokenEmployeeId;
-            console.log(employeeId);
-            console.log(reserveDate);            
+            const { reserveDate, searchAll, history } = req.query;
+            let employeeId;
+            if( searchAll == 1){
+                employeeId = req.query.employeeId || req.tokenEmployeeId;
+            }            
             const condition = {
                 reserveDate, 
             };
@@ -218,12 +219,22 @@ module.exports = new class Admin extends ControllerModels {
             {
                 condition.employeeId = employeeId;
             }
+            let status;
+            if(history == 1){
+                status = ["cancelled", "done"]
+            }
+            else{
+                status = ["waiting", "finalized"]
+            }
             console.log(condition);
-            const secarchResult = await this.Reserve.findAll({ where : { ...condition, status : { [Op.or] : ["cancelled", "done"] } }, raw : true});
+            const secarchResult = await this.Reserve.findAll({ where : { ...condition, status : { [Op.or] : status  } }, raw : true,
+            include : [{model : this.Person}, { model : this.Employee, include: { model :this.Person} }, { model : this.Service } ]});
             console.log(secarchResult);
+            const transformedData = this.transformData(secarchResult)
+            console.log(transformedData);
             res.status(200).json({
                 success : true,
-                result : secarchResult
+                result : transformedData
             });
 
         } catch (err) {
@@ -242,25 +253,7 @@ module.exports = new class Admin extends ControllerModels {
             // console.log(JSON.parse(reserveStatus) );
             const reserves = await this.Reserve.findAll({ where : { status : { [Op.or] : reserveStatus }, deleteTime : null }, 
             raw : true, include : [{ model: this.Person }, { model: this.Employee, include : { model : this.Person } }, { model: this.Service }] });
-            const transformedData = reserves.map( item => {
-                return {
-                    id : item.id,
-                    reserveDate : item.reserveDate,
-                    reserveTime : item.reserveTime,
-                    employeeId : item['employee.id'],
-                    employeeFname : item['employee.person.fName'],
-                    employeeLname : item['employee.person.lName'],
-                    emplloyePhone : item['employee.person.phone'],
-                    status : item.status,
-                    serviceTitle : item['service.serviceTitle'],
-                    serviceId : item['service.id'],
-                    customerId : item['person.id'],
-                    customerName : item['person.fName'],
-                    customerLastname : item['person.lName'],
-                    customerUsername : item['person.username'],
-                    customerPhone : item['person.phone']
-                }
-            });
+            const transformedData = this.transformData(reserves);
             res.status(200).json({
                 success : true,
                 result : transformedData
@@ -273,6 +266,29 @@ module.exports = new class Admin extends ControllerModels {
                 success : false
             });
         }
+    }
+
+    transformData(reserves){
+        const transformedData = reserves.map( item => {
+            return {
+                id : item.id,
+                reserveDate : item.reserveDate,
+                reserveTime : item.reserveTime,
+                employeeId : item['employee.id'],
+                employeeFname : item['employee.person.fName'],
+                employeeLname : item['employee.person.lName'],
+                emplloyePhone : item['employee.person.phone'],
+                status : item.status,
+                serviceTitle : item['service.serviceTitle'],
+                serviceId : item['service.id'],
+                customerId : item['person.id'],
+                customerName : item['person.fName'],
+                customerLastname : item['person.lName'],
+                customerUsername : item['person.username'],
+                customerPhone : item['person.phone']
+            }
+        });
+        return transformedData;
     }
 
     searchReservesByNameOrPhone = async (req, res) => {
@@ -308,7 +324,6 @@ module.exports = new class Admin extends ControllerModels {
                 });
                 searchResult = allUsers.filter( user => user['employee.id'] == null )
             }
-            console.log(searchResult);
 
             res.status(200).json({
                 success : true,
