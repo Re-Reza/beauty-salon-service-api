@@ -212,26 +212,29 @@ module.exports = new class Admin extends ControllerModels {
             if( searchAll == 1){
                 employeeId = req.query.employeeId || req.tokenEmployeeId;
             }            
-            const condition = {
-                reserveDate, 
-            };
+            const condition = {};
+            if(reserveDate != 'null' && reserveDate.trim() !="")
+            {
+                condition.reserveDate = reserveDate;
+            }
+            console.log("condition")
             if( employeeId )
             {
                 condition.employeeId = employeeId;
             }
             let status;
             if(history == 1){
-                status = ["cancelled", "done"]
+                status = ["cancelled", "done"];
             }
             else{
-                status = ["waiting", "finalized"]
+                status = ["waiting", "finalized"];
             }
-            console.log(condition);
+
             const secarchResult = await this.Reserve.findAll({ where : { ...condition, status : { [Op.or] : status  } }, raw : true,
             include : [{model : this.Person}, { model : this.Employee, include: { model :this.Person} }, { model : this.Service } ]});
             console.log(secarchResult);
             const transformedData = this.transformData(secarchResult)
-            console.log(transformedData);
+    
             res.status(200).json({
                 success : true,
                 result : transformedData
@@ -292,42 +295,49 @@ module.exports = new class Admin extends ControllerModels {
     }
 
     searchReservesByNameOrPhone = async (req, res) => {
-        //if enetered phone search on phone and entered name search on name   
         try{
-            const { isEmployee, searchValue } = req.query;
-            console.log(isEmployee, searchValue);
-            let searchResult;
-            if( isEmployee == 1 ) {
-                searchResult = await this.Employee.findAll({  
-                    include : [ {model : this.Person, where : {
-                        [Op.or] : [ 
-                            {
-                                phone : { [Op.like] : `${searchValue}%` } 
-                            },
-                            where(fn('concat', col('fName'),' ', col('lName')), {
-                                [Op.like]: `${searchValue}%`
-                            })
-                        ]} }], raw:true 
-                });
+            const { isEmployee, searchValue, history } = req.query;
+            let status;
+            if(history == 1){
+                status = ["cancelled", "done"];
             }
-            else{ 
-                const allUsers = await this.Person.findAll({ 
-                    where : { [Op.or] : [
+            else{
+                status = ["waiting", "finalized"];
+            }
+            let searchResult;
+            if( isEmployee == 1 )
+            {
+                searchResult = await this.Reserve.findAll({ where : { status }, required: false,
+                include : [{model : this.Employee, required: true, attributes:['id'] , include : { model : this.Person, attributes:['fName', 'lName', 'phone'],where : {
+                    [Op.or] : [ 
                         {
                             phone : { [Op.like] : `${searchValue}%` } 
                         },
                         where(fn('concat', col('fName'),' ', col('lName')), {
                             [Op.like]: `${searchValue}%`
                         })
-                    ]}  
-                    , raw :true, include : [{model : this.Employee, required: false,require : false}]
-                });
-                searchResult = allUsers.filter( user => user['employee.id'] == null )
+                    ]} } }, {model : this.Person, attributes:['fName', 'lName', 'phone', 'id'] }, {model : this.Service, attributes: ['serviceTitle', 'id']} ] ,raw : true });
             }
+            else{
 
+                searchResult = await this.Reserve.findAll({ where : { status }, required: false,
+                include : [ {model : this.Person,  required : true, attributes:["id", "fName", "lName", "phone"],where : { [Op.or] : [
+                    {
+                        phone : { [Op.like] : `${searchValue}%` } 
+                    },
+                    where(fn('concat', col('fName'),' ', col('lName')), {
+                        [Op.like]: `${searchValue}%`
+                    })
+                ]} },
+                {model : this.Employee, attributes:['id'] , include : { model : this.Person, attributes:['fName', 'lName', 'phone'] } }, 
+                {model : this.Service, attributes: ['serviceTitle', 'id']} ] , raw : true });
+            }
+            
+            const transformedData = this.transformData(searchResult);
+            // console.log(transformedData);
             res.status(200).json({
                 success : true,
-                result : "testing"
+                result : transformedData
             });
         }   
         catch( err ){

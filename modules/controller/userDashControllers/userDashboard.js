@@ -75,22 +75,6 @@ module.exports = new class UserDashboard extends ControllerModels {
             });
         });
     }
-    
-    // extractReservesHistory = async ( req, res) => {
-    //     const { tokenPhone, tokenPersonId} = req;
-    //     this.extractReserves( tokenPersonId, ['done', 'cancelled'] ).then( reserveDate => {
-    //         res.status(200).json({
-    //             success : true,
-    //             result : reserveDate
-    //         });
-    //     }).catch( err =>{ 
-    //         console.log(err);
-    //         res.status(500).json({
-    //             success : false,
-    //             error : err
-    //         });
-    //     });
-    // }
 
     deleteReserve = async ( req, res ) => {
    
