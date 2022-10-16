@@ -110,12 +110,7 @@ module.exports = new class EmployeeDashController extends ControllerModels {
             // const { tokenEmployeeId, params : { reserveId } } = req;
             // const tokenEmployeeId = req.tokenEmployeeId || req.query;
             const {reserveId} = req.params;
-            const statusCondition = req.tokenRoleID == 2 ? ["waiting", "finalized"] : ["waiting"];
-            // const newData = {}
-            // if( req.body.time )
-            //     newData.reserveTime = req.body.time;
-            // if( req.body.date )
-            //     newData.reserveDate = req.body.date;
+            // const statusCondition = req.tokenRoleID == 2 ? ["waiting", "finalized"] : ["waiting"];
             let newData={};
             if(req.body.newTime)
                 newData.reserveTime = req.body.newTime
@@ -124,7 +119,7 @@ module.exports = new class EmployeeDashController extends ControllerModels {
             else
                 newData.status ="finalized";
             console.log(newData);
-            const result = await this.Reserve.update({ ...newData}, { where  : { id : reserveId,  status: { [Op.or] : [...statusCondition] } } })
+            const result = await this.Reserve.update({ ...newData}, { where  : { id : reserveId,  status: { [Op.or] : ["waiting", "finalized"] } } })
             if( result == 1) {
                 return res.status(200).json({
                     success : true,

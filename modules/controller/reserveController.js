@@ -49,7 +49,6 @@ module.exports = new class ReserveController extends ControllerModels {
             const employeesOfService = await this.Service.findAll({ where : { id: serviceId }, include : [ { model: this.Employee, include : { model:this.Person}  } ], raw : true })
             
             const validEmployees = [];
-            console.log(employeesOfService)
             employeesOfService.forEach( (item, index) => {
                 this.isEmployeeValid( item['employees.id'], date, serviceId ).then( isValid => {
                     if( isValid ){
@@ -87,7 +86,7 @@ module.exports = new class ReserveController extends ControllerModels {
         try{ 
             const counter = await this.Reserve.count( { where : { employeeId : id,
                 reserveDate : date, status : { [Op.or] : ["waiting",  "finalized"]}, serviceId : serviceId  } } );
-            
+            console.log(counter)
             //must get number of week customer from propre table
             return counter < 2 ? true : false;
         }
@@ -102,12 +101,12 @@ module.exports = new class ReserveController extends ControllerModels {
             //تاریخ و کارمندان وخدمات در دسترس کاربر قبل از قرار گرفتن در دسترسی ان اعتبار سنجی شده اند
             const customerId = req.tokenPersonId;
             const { reserveDate, employeeId, employeePersonId, serviceId} = req.body;
+
             if(customerId == employeePersonId )
                 return res.status(422).json({
                     sucess : false,
                     error : "مشتری و کارمند نمیتوانند یکسان باشند"
                 })
-                console.log("in top")
             console.log(req.body);
             const m = moment();
             moment.locale('fa', { useGregorianParser: true } );
@@ -169,27 +168,73 @@ module.exports = new class ReserveController extends ControllerModels {
     extractEmployeeTimeWork = async ( req, res ) => {
   
         const { employeeId, serviceId } = req.query;
+        // const m = moment().add(2,"day");
         const m = moment();
         moment.locale('fa', { useGregorianParser: true } );
-        console.log(m.format("YYYY/M/D") );
-
-        const {count, rows} = await this.Reserve.findAndCountAll( { where : {employeeId, serviceId }, raw: true });
-
+        const currentDayOfWeek = m.jDay();
+        
+        const {count, rows} = await this.Reserve.findAndCountAll( { where : {employeeId, serviceId, status :{ [Op.or] : ['waiting', 'finalized']} }, raw: true });
         const weekFreeTimeWork = [];
-        for( let i=0; i<7; i++ ) {
-            const result = this.countReserves( rows, m.format("YYYY/M/D") );
-            console.log(result);
-            if(result < 2){ //get number from related table
-                weekFreeTimeWork.push( m.format("DD") );
+        console.log(rows)
+        console.log(m.format("YYYY/MM/DD"));
+        if( currentDayOfWeek >= 4)
+        {   
+            const quantities = await this.CustomerQuantitiy.findAll({ where : { employeeId:employeeId }, 
+                attributes : ['d0','d1','d2','d3','d4','d5', 'd6', 'isFirstWeek'], raw : true });
+    
+            const currentWeek = m.jWeek();
+            for(let i = 0; i<=(6+(6-currentDayOfWeek)); i++){
+
+                const result = this.countReserves( rows, m.format("YYYY/MM/DD") );
+        
+                const quantity = m.jDay()>=4 && m.jWeek() == currentWeek ?quantities.filter(item => item.isFirstWeek == 1 )[0] : quantities.filter(item => item.isFirstWeek == 0 )[0];
+                const condtion = quantity? quantity[[`d${m.jDay()}`]] : 0;
+
+                if(result < condtion ){ 
+                    weekFreeTimeWork.push( m.format("DD") );
+                }
+                m.add(1, "day"); 
             }
-            m.add(1, "day");
+
+        }
+        else {
+            const quantity = await this.CustomerQuantitiy.findAll({ where : { employeeId:employeeId, isFirstWeek : 1 }, 
+                attributes : ['d0','d1','d2','d3','d4','d5', 'd6'], raw : true });
+            const quantityObj = quantity[0];
+
+            for(let i = currentDayOfWeek; i<=7-currentDayOfWeek; i++){
+                const result = this.countReserves( rows, m.format("YYYY/MM/DD") );
+                const condtion = quantityObj? quantityObj[[`d${m.jDay()}`]] : 0;
+                if(result < condtion){ 
+                    console.log(quantityObj[`d${m.jDay()}`] );
+                    weekFreeTimeWork.push( m.format("DD") );
+                }
+                m.add(1, "day"); 
+            }
+        }
+
+        // let now = moment().add(2,"day")
+        
+        let now = moment();
+
+        let end;
+        const start = now.format("YYYY/MM/DD");
+        
+        if( now.jDay() >= 4)
+        {
+            // end = left days of this week + days of next week    
+            end = now.add(6 + (6-now.jDay() ), "day").format("YYYY/MM/DD");
+        }
+        else{
+            // end = left days of this week + days of next week 
+            end = now.add( 6-now.jDay() , "day").format("YYYY/MM/DD");
         }
 
         res.status(200).json({
             result : {
                 freeDays : weekFreeTimeWork,
-                start : new Date().setDate( new Date().getDate() ),
-                end : new Date().setDate( new Date().getDate()+6)
+                start,
+                end
             },
             success : true
         });
@@ -210,10 +255,25 @@ module.exports = new class ReserveController extends ControllerModels {
     }
 
     provideDateRange = (req, res) => {
+        moment.locale("fa", { useGregorianParser : true });
+        let now = moment();
+    
+        let end;
+        const start = now.format("YYYY/MM/DD");
+        
+        if( now.jDay() >= 4)
+        {
+            // end = left days of this week + days of next week    
+            end = now.add(6 + (6-now.jDay() ), "day").format("YYYY/MM/DD");
+        }
+        else{
+            // end = left days of this week + days of next week 
+            end = now.add( 6-now.jDay() , "day").format("YYYY/MM/DD");
+        }
         res.status(200).json({
                 result : {
-                start : new Date().setDate( new Date().getDate() ),
-                end : new Date().setDate( new Date().getDate()+6)
+                start,
+                end 
             },
             success : true
         });

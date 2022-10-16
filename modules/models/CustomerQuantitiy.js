@@ -1,39 +1,43 @@
 const sequelizeInstace = require(setPath.configPath+"/database");
-const { DataTypes, STRING } = require('sequelize');
+const { DataTypes } = require('sequelize');
 
 const CustomerQuantitiy = sequelizeInstace.define("customerQuantities", {
-    sat : {
-        type : DataTypes.TINYINT,
-        defaultValue : 4
+    d0 : {
+        type : DataTypes.INTEGER,
+        defaultValue : 0
     },
-    sun : {
-        type : DataTypes.TINYINT,
-        defaultValue : 4
+    d1 : {
+        type : DataTypes.INTEGER,
+        defaultValue : 0
     },
-    mon : {
-        type : DataTypes.TINYINT,
-        defaultValue : 4
+    d2 : {
+        type : DataTypes.INTEGER,
+        defaultValue : 0
     },    
-    tues : {
-        type : DataTypes.TINYINT,
+    d3 : {
+        type : DataTypes.INTEGER,
         defaultValue : 4
     },   
-    wed : {
-        type : DataTypes.TINYINT,
-        defaultValue : 4
+    d4 : {
+        type : DataTypes.INTEGER,
+        defaultValue : 0
     },
-    thurs: {
-        type : DataTypes.TINYINT,
-        defaultValue : 4
+    d5: {
+        type : DataTypes.INTEGER,
+        defaultValue : 0
     },
-    friday: {
-        type : DataTypes.TINYINT,
-        defaultValue : 4 
+    d6: {
+        type : DataTypes.INTEGER,
+        defaultValue : 0
     },
-    deletedDate : {
-        type : DataTypes.STRING(25),
-        defaultValue : null
-    }
+    isFirstWeek :{
+        type : DataTypes.BOOLEAN,
+        defaultValue : true
+    },
+    // deletedDate : {
+    //     type : DataTypes.STRING(25),
+    //     defaultValue : null
+    // }
     
 },{
     freezeTableName : true,

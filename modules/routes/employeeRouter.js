@@ -7,9 +7,11 @@ const changInfo = require(setPath.controllerPath+"/userDashControllers/userDashb
 
 router.post("/setWeeklyCustomerQuantity",  authenticateToken, authenticateEmployee, weeklyCustomerQuantity.setCustomerQuantity );
 
+router.get("/providePlanDates", authenticateToken, authenticateEmployee, weeklyCustomerQuantity.providePlanDates );
+
 router.get("/provideEmployeeInfo", authenticateToken, authenticateEmployee, employeeDashController.provideEmployeeInfo );
 
-//this route will extract all reserves of employee in fornt can categorize them into history and current
+//this route will extract all reserves of employee in front can categorize them into history and current
 router.get("/extractCustomerList", authenticateToken, authenticateEmployee, employeeDashController.extractCustomerList );
 
 router.put("/editDateAndTime/:reserveId", authenticateToken, authenticateEmployee, employeeDashController.editDateAndTime );

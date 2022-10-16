@@ -207,21 +207,17 @@ module.exports = new class Admin extends ControllerModels {
     searchInReservesByDate = async (req, res) => {
         try {
 
-            const { reserveDate, searchAll, history } = req.query;
-            let employeeId;
-            if( searchAll == 1){
-                employeeId = req.query.employeeId || req.tokenEmployeeId;
-            }            
+            const { reserveDate, employeeIsSearching, history } = req.query;
+
             const condition = {};
+            if( employeeIsSearching == 1){
+                condition.employeeId =  req.tokenEmployeeId;
+            }            
             if(reserveDate != 'null' && reserveDate.trim() !="")
             {
                 condition.reserveDate = reserveDate;
             }
-            console.log("condition")
-            if( employeeId )
-            {
-                condition.employeeId = employeeId;
-            }
+            console.log(condition)
             let status;
             if(history == 1){
                 status = ["cancelled", "done"];
@@ -232,7 +228,7 @@ module.exports = new class Admin extends ControllerModels {
 
             const secarchResult = await this.Reserve.findAll({ where : { ...condition, status : { [Op.or] : status  } }, raw : true,
             include : [{model : this.Person}, { model : this.Employee, include: { model :this.Person} }, { model : this.Service } ]});
-            console.log(secarchResult);
+
             const transformedData = this.transformData(secarchResult)
     
             res.status(200).json({
@@ -296,18 +292,23 @@ module.exports = new class Admin extends ControllerModels {
 
     searchReservesByNameOrPhone = async (req, res) => {
         try{
-            const { isEmployee, searchValue, history } = req.query;
-            let status;
+            const { isEmployee, searchValue, history, employeeIsSearching } = req.query;
+    
+            const conditon = {};
             if(history == 1){
-                status = ["cancelled", "done"];
+                conditon.status = ["cancelled", "done"];
             }
             else{
-                status = ["waiting", "finalized"];
+                conditon.status = ["waiting", "finalized"];
             }
+            if(employeeIsSearching == 1){
+                conditon.employeeId = req.tokenEmployeeId;
+            }
+            console.log(conditon)
             let searchResult;
             if( isEmployee == 1 )
             {
-                searchResult = await this.Reserve.findAll({ where : { status }, required: false,
+                searchResult = await this.Reserve.findAll({ where : { ...conditon }, required: false,
                 include : [{model : this.Employee, required: true, attributes:['id'] , include : { model : this.Person, attributes:['fName', 'lName', 'phone'],where : {
                     [Op.or] : [ 
                         {
@@ -319,8 +320,7 @@ module.exports = new class Admin extends ControllerModels {
                     ]} } }, {model : this.Person, attributes:['fName', 'lName', 'phone', 'id'] }, {model : this.Service, attributes: ['serviceTitle', 'id']} ] ,raw : true });
             }
             else{
-
-                searchResult = await this.Reserve.findAll({ where : { status }, required: false,
+                searchResult = await this.Reserve.findAll({ where : { ...conditon }, required: false,
                 include : [ {model : this.Person,  required : true, attributes:["id", "fName", "lName", "phone"],where : { [Op.or] : [
                     {
                         phone : { [Op.like] : `${searchValue}%` } 
