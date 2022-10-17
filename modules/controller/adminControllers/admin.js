@@ -217,7 +217,7 @@ module.exports = new class Admin extends ControllerModels {
             {
                 condition.reserveDate = reserveDate;
             }
-            console.log(condition)
+    
             let status;
             if(history == 1){
                 status = ["cancelled", "done"];
@@ -248,14 +248,15 @@ module.exports = new class Admin extends ControllerModels {
         
         try {
             const { reserveStatus } = req.query;
-            console.log(reserveStatus)
-            // console.log(JSON.parse(reserveStatus) );
+            moment.locale("fa", { useGregorianParser : true} );
+            const now = moment().format("YYYY/MM/DD");
             const reserves = await this.Reserve.findAll({ where : { status : { [Op.or] : reserveStatus }, deleteTime : null }, 
             raw : true, include : [{ model: this.Person }, { model: this.Employee, include : { model : this.Person } }, { model: this.Service }] });
             const transformedData = this.transformData(reserves);
             res.status(200).json({
                 success : true,
-                result : transformedData
+                result : transformedData,
+                start : now
             });
 
         } catch (error) {

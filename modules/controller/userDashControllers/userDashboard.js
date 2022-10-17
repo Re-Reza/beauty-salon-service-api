@@ -319,7 +319,48 @@ module.exports = new class UserDashboard extends ControllerModels {
             res.status(500).json({
                 error : err,
                 success : false
-            })
+            });
+        }
+    }
+    
+    searhReserveByDate = async (req, res) => {
+        try{
+            const { date, isHistory } = req.query;
+            const condition = {};
+            if(isHistory == 1){
+                condition.status = ["cancelled", "done"];
+            }
+            else{
+                condition.status = ["waiting", "finalized"];
+            }
+
+            const result = await this.Reserve.findAll({ where : { customerId : req.tokenPersonId, ...condition, reserveDate : date }, 
+            include : [{ model: this.Person }, { model: this.Employee,include :  { model: this.Person } }, { model : this.Service } ],raw : true });
+           
+            const transformData = result.map( item => ({
+                id : item.id,
+                reserveDate : item.reserveDate,
+                reserveTime : item.reserveTime,
+                employeeId : item['employee.id'],
+                employeefName : item['employee.person.fName'],
+                employeelName : item['employee.person.lName'],
+                emplloyePhone : item['employee.person.phone'],
+                status : item.status,
+                service : item['service.serviceTitle'],
+                serviceId : item['service.id'],
+            }) );
+
+            res.status(200).json({
+                success : true,
+                result : transformData 
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({
+                error : err,
+                success : false
+            });
         }
     }
 

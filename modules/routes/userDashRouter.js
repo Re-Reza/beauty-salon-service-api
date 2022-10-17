@@ -52,6 +52,8 @@ router.post('/uploadProfileImage', authenticateToken, (req, res, next) => {
     }
 }, userDashboard.uploadProfileImage );
  
-router.get("/generalInfo", authenticateToken, userDashboard.generalInfo)
+router.get("/generalInfo", authenticateToken, userDashboard.generalInfo );
+
+router.get("/searhReserveByDate", authenticateToken, userDashboard.searhReserveByDate );
 
 module.exports = router;

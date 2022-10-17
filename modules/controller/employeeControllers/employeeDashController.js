@@ -64,7 +64,6 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                 success : true,
                 result : transformedData,
                 start : new Date().setDate( new Date().getDate() ),
-                end : new Date().setDate( new Date().getDate()+6 )
             });
         }
         catch( err ){

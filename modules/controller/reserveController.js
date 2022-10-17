@@ -40,17 +40,31 @@ module.exports = new class ReserveController extends ControllerModels {
     }
 
     extractEmployeesOfDate = async ( req, res ) => {
-        // const { month, day } = req.body;
+
         console.log(req.query)
         const { date, serviceId } = req.query
 
         try{
-            //optimize this part!
             const employeesOfService = await this.Service.findAll({ where : { id: serviceId }, include : [ { model: this.Employee, include : { model:this.Person}  } ], raw : true })
             
+            moment.locale("fa", { useGregorianParser : true });
+            const m = moment();
+            console.log(date)
+            const selectedDate =  moment(date, "YYYY/MM/DD");
+            const currentWeek = m.jWeek();
+            let isFirstWeek;
+            if(selectedDate.jWeek() == currentWeek)
+                isFirstWeek = 1;
+            else 
+                isFirstWeek = 0;
+            const dayNumber = selectedDate.jDay();
+            console.log("----")
+            console.log(isFirstWeek);
+
             const validEmployees = [];
             employeesOfService.forEach( (item, index) => {
-                this.isEmployeeValid( item['employees.id'], date, serviceId ).then( isValid => {
+                this.isEmployeeValid( item['employees.id'], date, serviceId, isFirstWeek, dayNumber ).then( isValid => {
+                    console.log(isValid)
                     if( isValid ){
 
                         validEmployees.push({
@@ -62,13 +76,12 @@ module.exports = new class ReserveController extends ControllerModels {
                             roleId : item['employees.roleId'],
                             profileImg : item['employees.person.profileImg']
                         });
-
-                        if( index === employeesOfService.length - 1 ) {
-                            res.status(200).json({
-                                    success : true,
-                                    result : validEmployees
-                            });
-                        }
+                    }
+                    if( index === employeesOfService.length - 1 ) {
+                        res.status(200).json({
+                            success : true,
+                            result : validEmployees
+                        });
                     }
                 });
             });
@@ -82,13 +95,18 @@ module.exports = new class ReserveController extends ControllerModels {
         }
     }
 
-    isEmployeeValid = async ( id, date, serviceId ) => {
-        try{ 
+    isEmployeeValid = async ( id, date, serviceId, isFirstWeek, dayNumber ) => {
+        try{    
+
+            const quantity = await this.CustomerQuantitiy.findOne({ where : { employeeId : id, isFirstWeek }, raw : true});
+            console.log(quantity); 
+
+            const quty = quantity ? quantity[`d${dayNumber}`] : 0;
+            // console.log("quty: "+quty);
             const counter = await this.Reserve.count( { where : { employeeId : id,
                 reserveDate : date, status : { [Op.or] : ["waiting",  "finalized"]}, serviceId : serviceId  } } );
-            console.log(counter)
-            //must get number of week customer from propre table
-            return counter < 2 ? true : false;
+
+            return counter < quty ? true : false;
         }
         catch(err){
             console.log(err)
@@ -169,8 +187,8 @@ module.exports = new class ReserveController extends ControllerModels {
   
         const { employeeId, serviceId } = req.query;
         // const m = moment().add(2,"day");
-        const m = moment();
         moment.locale('fa', { useGregorianParser: true } );
+        const m = moment();
         const currentDayOfWeek = m.jDay();
         
         const {count, rows} = await this.Reserve.findAndCountAll( { where : {employeeId, serviceId, status :{ [Op.or] : ['waiting', 'finalized']} }, raw: true });
@@ -256,8 +274,9 @@ module.exports = new class ReserveController extends ControllerModels {
 
     provideDateRange = (req, res) => {
         moment.locale("fa", { useGregorianParser : true });
+        // let now = moment().add(2, 'day');
         let now = moment();
-    
+
         let end;
         const start = now.format("YYYY/MM/DD");
         
