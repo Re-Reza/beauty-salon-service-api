@@ -48,4 +48,4 @@ sequelize.sync({ alter : false }).then( result => {
     
 }).catch( err => {
     console.log(err);
-})
+});

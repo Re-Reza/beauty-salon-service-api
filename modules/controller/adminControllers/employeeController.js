@@ -19,6 +19,7 @@ module.exports = new class EmployeeController extends ControllerModels{
             bcryptUtils.hashPassword( "1234" ).then( async hashedPass =>  {
 
                 try{
+                    //insert in
                     const createdPerson = await this.Person.create( { fName, lName, password: hashedPass ,phone}, { raw : true} ); 
                     const createdEmployee = await this.Employee.create( {roleId:1, nationalId}, { raw : true} );
                     createdPerson.setEmployee( createdEmployee );

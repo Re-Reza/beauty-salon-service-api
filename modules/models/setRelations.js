@@ -10,6 +10,7 @@ const Service = require("./Service");
 const CustomerQuantitiy = require("./CustomerQuantitiy");
 const Message = require("./Message");
 const MessageReaders = require("./MessageReaders");
+const Product = require("./Product");
 
 module.exports = function () {
     

@@ -209,7 +209,7 @@ module.exports = new class ReserveController extends ControllerModels {
                 const condtion = quantity? quantity[[`d${m.jDay()}`]] : 0;
 
                 if(result < condtion ){ 
-                    weekFreeTimeWork.push( m.format("DD") );
+                    weekFreeTimeWork.push( m.format("YYYY/MM/DD") );
                 }
                 m.add(1, "day"); 
             }
@@ -225,7 +225,7 @@ module.exports = new class ReserveController extends ControllerModels {
                 const condtion = quantityObj? quantityObj[[`d${m.jDay()}`]] : 0;
                 if(result < condtion){ 
                     console.log(quantityObj[`d${m.jDay()}`] );
-                    weekFreeTimeWork.push( m.format("DD") );
+                    weekFreeTimeWork.push( m.format("YYYY/MM/DD") );
                 }
                 m.add(1, "day"); 
             }
@@ -247,6 +247,7 @@ module.exports = new class ReserveController extends ControllerModels {
             // end = left days of this week + days of next week 
             end = now.add( 6-now.jDay() , "day").format("YYYY/MM/DD");
         }
+        console.log(weekFreeTimeWork);
 
         res.status(200).json({
             result : {

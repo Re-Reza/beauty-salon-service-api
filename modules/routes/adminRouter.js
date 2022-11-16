@@ -9,16 +9,13 @@ const serviceController = require(setPath.controllerPath+"/adminControllers/serv
 const employeeController = require(setPath.controllerPath+"/adminControllers/employeeController");
 const admin = require(setPath.controllerPath+"/adminControllers/admin");
 const adminMessage = require(setPath.controllerPath+"/adminControllers/adminMessage");
+const productController = require(setPath.controllerPath+"/adminControllers/productController");
 
+router.post("/addNewServiceCategoey", authenticateToken, authenticateEmployee,  serviceController.addNewServiceCategoey );
 
-//LCV9c9 => admin password
-// 9900 => admin phone 
+router.delete("/deleteService", authenticateToken, authenticateEmployee, serviceController.deleteService );
 
-router.post("/addNewServiceCategoey", serviceController.addNewServiceCategoey );
-
-router.delete("/deleteService", serviceController.deleteService );
-
-router.post("/addNewEmployee", employeeController.addNewEmployee );
+router.post("/addNewEmployee", authenticateToken, authenticateEmployee, employeeController.addNewEmployee );
 
 //use provideEmployeeInfo to get admin info
 
@@ -61,5 +58,7 @@ router.delete("/deleteMessage/:messageId", authenticateToken, authenticateEmploy
 router.get('/allAdminMessages', authenticateToken, authenticateEmployee, adminMessage.provideAllMessages );
 
 router.get('/provideCategoriesServices', authenticateToken, authenticateEmployee, serviceController.provideCategoriesServices);
+
+router.post('/addNewProduct', authenticateToken, authenticateEmployee, productController.addNewProduct );
 
 module.exports = router; 
