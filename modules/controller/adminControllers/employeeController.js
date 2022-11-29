@@ -1,6 +1,7 @@
 const ControllerModels = require("../ControllerModels");
 const generator = require('generate-password');
 const bcryptUtils = require("../../middlewares/bcryptUtils");
+const { fn, col } = require("sequelize");
 
 module.exports = new class EmployeeController extends ControllerModels{
 
@@ -79,6 +80,37 @@ module.exports = new class EmployeeController extends ControllerModels{
                 })
             });
         });
+    } 
+
+    provideFullInfoOfEmployees = async ( req, res ) => {
+        try{
+            const employees = await this.Employee.findAll({ attributes : ["id", "nationalId", "roleId"],
+            include : [{ model : this.Person, attributes: ["id", "fName", "lName", "phone" ]} ,{model : this.Service}, 
+            { model : this.Reserve} ]});
+        
+            const employeeList = [];
+
+            employees.forEach( item => {
+                employeeList.push( item.toJSON() );
+            });
+
+            console.log(employeeList);
+            
+            res.status(200).json({
+                success : true, 
+                result : employeeList
+            });
+        }  
+
+        catch( err ) { 
+
+            console.log(err);
+            res.status(500).json({
+                error : err,
+                success : false
+            });
+
+        }
     } 
 
 }

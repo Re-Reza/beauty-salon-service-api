@@ -364,4 +364,31 @@ module.exports = new class UserDashboard extends ControllerModels {
         }
     }
 
+    deleteAccount = async (req, res) =>{
+
+        try{
+            const { tokenPhone, tokenRoleID } = req;
+            if( tokenRoleID == 2 ){
+                res.status(422).json({
+                    error : "admin can not be desleted",
+                    success : false 
+                });
+            }
+
+            const result = await this.Person.destroy({ where : { phone : tokenPhone } } );
+            console.log(result);
+            res.status(200).json({
+                success : true,
+                result
+            });
+
+        } catch(err) {
+            console.log(err);
+            res.status(500).json({
+                success : false,
+                error : err 
+            });
+        }
+    }
+
 }

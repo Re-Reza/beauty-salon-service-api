@@ -7,14 +7,16 @@ const ControllerModels = require("../ControllerModels");
 module.exports = new class Admin extends ControllerModels {
 
     employeesList = async (req, res) => {
+        
         const employees = await this.Employee.findAll({ where : { roleId : { [Op.not] : [2] } }, 
             include : [ {model : this.Person}, {model: this.Role} ] });
-            console.log(employees);
+
         if(employees.length == 0)
             return res.status(200).json({
                 result : [],
                 success : true
             });
+            
         const transformedData = [];
         employees.forEach( async (item, index) => {
             const employeeServices = await item.getServices();
@@ -70,7 +72,7 @@ module.exports = new class Admin extends ControllerModels {
     extractServices = async ( req, res) => {
         try{
             const services  = await this.Service.findAll({ raw: true });
-            console.log(services)
+
             res.status(200).json({
                 result : services,
                 success : true
@@ -123,7 +125,6 @@ module.exports = new class Admin extends ControllerModels {
             if(newServices.length > 0)
             {
                 foundServices = await this.findServices( newServices );
-                
             }
             employee.setServices( foundServices );
 

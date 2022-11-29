@@ -13,7 +13,7 @@ app.use( cors( {
     origin: ['http://localhost:3000'],
     credentials:true,
     optionSuccessStatus:200,
-    methods : ['GET', 'POST', 'PUT', 'DELETE']
+    methods : ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
 }) );
 
 app.use( bodyParser.urlencoded( { extended : false} ) );
@@ -26,8 +26,8 @@ dotenv.config({
 const setPath = require("./modules/utilties/path");
 global.setPath = setPath; 
 
-// public folder (which was given to express static will be ignored and must not mentioned so we can add route /publix)
-app.use("/public" ,express.static( path.join(__dirname, "public") ) );
+// public folder (which was given to express static will be ignored and must not mentioned so we can add route /public)
+app.use("/public", express.static( path.join(__dirname, "public") ) );
 
 //set models 
 const sequelize = require(setPath.configPath+"/database")

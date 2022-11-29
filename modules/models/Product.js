@@ -25,7 +25,6 @@ const Product = sequelizeInstace.define("products", {
         allowNull : false
     }
 
-
 }, {
     freezeTableName : true,
     timestamps : false

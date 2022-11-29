@@ -61,4 +61,6 @@ router.get('/provideCategoriesServices', authenticateToken, authenticateEmployee
 
 router.post('/addNewProduct', authenticateToken, authenticateEmployee, productController.addNewProduct );
 
+router.get('/provideFullInfoOfEmployees', authenticateToken, authenticateEmployee, employeeController.provideFullInfoOfEmployees );
+
 module.exports = router; 

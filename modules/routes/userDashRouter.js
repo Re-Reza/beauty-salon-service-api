@@ -56,4 +56,6 @@ router.get("/generalInfo", authenticateToken, userDashboard.generalInfo );
 
 router.get("/searhReserveByDate", authenticateToken, userDashboard.searhReserveByDate );
 
+router.delete("/deleteAccount", authenticateToken, userDashboard.deleteAccount );
+
 module.exports = router;
