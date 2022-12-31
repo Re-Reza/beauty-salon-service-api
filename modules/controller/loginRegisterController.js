@@ -39,6 +39,7 @@ module.exports = new class LoginRegisterController extends ControllerModels {
             
             });
 
+            
 
         }).catch( err => {
             console.log(err)

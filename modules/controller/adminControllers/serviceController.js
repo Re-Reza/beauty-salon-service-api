@@ -4,7 +4,6 @@ module.exports = new class AdminController extends ControllerModels {
 
     addNewEmployee = async (req, res) => {
         try{
-            //must validata body data 
             console.log(req.body)
             const result = await this.Employee.create(req.body);
             res.status(200).json({
@@ -28,13 +27,12 @@ module.exports = new class AdminController extends ControllerModels {
             },
             services : [] services related to send serviceCategoey
         }*/
-        const { serviceCategory : {id, categoryTitle}, service } = req.body;
+        const { serviceCategory : {id, categoryTitle}, service, cost } = req.body;
         console.log(service)
         if( id ){
             try{
                 const foundService = await this.ServiceCategory.findOne( { where : {id: id}});
-                // const createdServices = await this.Service.bulkCreate( services );
-                const createdService = await this.Service.create( {serviceTitle : service});
+                const createdService = await this.Service.create( {serviceTitle : service, cost});
                 await foundService.addServices(createdService); 
                 res.status(200).json({
                     success : true,
@@ -122,4 +120,21 @@ module.exports = new class AdminController extends ControllerModels {
         }
     }
     
+    updataService = async ( req, res) => {
+        try{
+            const { id, cost } = req.body;
+            const result = this.Service.update({ cost }, { where : { id }});
+            res.status(200).json({
+                success : true,
+                result
+            });
+        }
+        catch( err ){
+            console.log(err);
+            res.status(500).json({
+                success : false,
+                error : err
+            });
+        }
+    }
 }

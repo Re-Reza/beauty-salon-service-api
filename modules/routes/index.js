@@ -8,7 +8,7 @@ const employeeRouter = require('./employeeRouter');
 const userDashRouter = require("./userDashRouter");
 const homeRouter = require("./homeRouter");
 
-router.use( loginRegister);
+router.use( loginRegister );
 router.use("/admin", adminRouter);
 router.use("/reserve", reserveRouter);
 router.use("/employeeDashboard", employeeRouter);

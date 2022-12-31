@@ -18,7 +18,7 @@ const Person = sequelizeInstace.define("persons", {
     // },
     password : {
         type : DataTypes.STRING,
-        allowNull : false 
+        allowNull : false,
     },
     phone : {
         type : DataTypes.STRING(18),

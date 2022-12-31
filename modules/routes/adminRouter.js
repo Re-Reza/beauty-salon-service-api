@@ -13,6 +13,8 @@ const productController = require(setPath.controllerPath+"/adminControllers/prod
 
 router.post("/addNewServiceCategoey", authenticateToken, authenticateEmployee,  serviceController.addNewServiceCategoey );
 
+router.put("/editService", authenticateToken, authenticateEmployee, serviceController.updataService )
+
 router.delete("/deleteService", authenticateToken, authenticateEmployee, serviceController.deleteService );
 
 router.post("/addNewEmployee", authenticateToken, authenticateEmployee, employeeController.addNewEmployee );
