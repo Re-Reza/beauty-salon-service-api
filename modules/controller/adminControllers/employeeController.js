@@ -1,7 +1,8 @@
 const ControllerModels = require("../ControllerModels");
 const generator = require('generate-password');
 const bcryptUtils = require("../../middlewares/bcryptUtils");
-const { fn, col } = require("sequelize");
+const { Op } = require("sequelize");
+const moment = require('jalali-moment');
 
 module.exports = new class EmployeeController extends ControllerModels{
 
@@ -112,5 +113,53 @@ module.exports = new class EmployeeController extends ControllerModels{
 
         }
     } 
+
+    provideFullInfoOfEmployees = async (req, res) => {
+        try{
+            moment.locale("fa", { useGregorianParser : true });
+            const { employeeId } = req.query;
+            const reserves = await this.Reserve.findAll({ where : { employeeId, payment :{ [Op.ne] : null} }, });
+            const m = moment();
+            let allSalary = 0;
+            let prevWeekSalary = 0;
+            let prevMonthSalary = 0;
+            const currentWeek = m.week();
+            const currentMonth = m.month();
+            // console.log(currentWeek);
+            // console.log(currentMonth);
+            reserves.forEach(item => {
+                const jsonItem = item.toJSON();
+                // console.log(jsonItem)
+                allSalary += parseFloat(jsonItem.payment);
+                //should be reserveTime************************
+                const dateMoment = moment(jsonItem.reserveDate, "jYYYY/jMM/jDD");
+                const dateWeek = dateMoment.week();
+                const dateMonth = dateMoment.month();
+                // console.log(dateWeek)
+                // console.log(dateMonth)
+                if( dateWeek == currentWeek-1 )
+                    prevWeekSalary += parseFloat(jsonItem.payment);
+                if(dateMonth == currentMonth-1 )
+                    prevMonthSalary += parseFloat(jsonItem.payment);
+
+            });
+        
+            res.status(200).json({
+                success : true,
+                result : {
+                    allSalary,
+                    prevWeekSalary,
+                    prevMonthSalary
+                }
+            }); 
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({
+                error : err,
+                success : false
+            });
+        }
+    }
 
 }

@@ -20,7 +20,10 @@ const Reserve = sequelizeInstace.define("reserves", {
     deleteTime : {
         type : DataTypes.STRING(80),
     },
-
+    payment :{ 
+        type : DataTypes.DECIMAL(15, 3),
+        allowNull : true
+    }
     // read : {
     //     type : DataTypes.BOOLEAN,
     //     defaultValue : false

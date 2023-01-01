@@ -78,7 +78,6 @@ module.exports = new class EmployeeDashController extends ControllerModels {
     extractCustomerReservesList = async (tokenEmployeeId, readValues ) => {
         try{
             //read : { [Op.or] : [...readValues] } was wrriten for messages
-            console.log("top")
             const reserves = await this.Reserve.findAll({ where: { employeeId : tokenEmployeeId, deleteTime : null }, raw : true, include : [{ model : this.Service}, {model : this.Person}] });
             console.log(reserves)
             const transformedData = reserves.map( item => {
@@ -92,7 +91,8 @@ module.exports = new class EmployeeDashController extends ControllerModels {
                     customerName : item['person.fName'],
                     customerLastname : item['person.lName'],
                     customerPhone : item['person.phone'],
-                    reserveTime : item.reserveTime
+                    reserveTime : item.reserveTime,
+                    payment : item.payment
                 }
             });
             return transformedData;
@@ -108,15 +108,19 @@ module.exports = new class EmployeeDashController extends ControllerModels {
         try{
             // const { tokenEmployeeId, params : { reserveId } } = req;
             // const tokenEmployeeId = req.tokenEmployeeId || req.query;
-            const {reserveId} = req.params;
+            const {reserveId } = req.params;
+            const { payment,  newTime, newStatus} = req.body
             // const statusCondition = req.tokenRoleID == 2 ? ["waiting", "finalized"] : ["waiting"];
             let newData={};
-            if(req.body.newTime)
-                newData.reserveTime = req.body.newTime
-            if( req.body.newStatus)
-                newData.status = req.body.newStatus
+            if(newTime)
+                newData.reserveTime = newTime;
+            if(payment)
+                newData.payment = payment;
+            if( newStatus )
+                newData.status = newStatus
             else
                 newData.status ="finalized";
+            
             console.log(newData);
             const result = await this.Reserve.update({ ...newData}, { where  : { id : reserveId,  status: { [Op.or] : ["waiting", "finalized"] } } })
             if( result == 1) {

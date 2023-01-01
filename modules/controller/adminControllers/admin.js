@@ -183,7 +183,6 @@ module.exports = new class Admin extends ControllerModels {
         try {
             moment.locale("fa", { useGregorianParser : true });
             const currentTime = moment().format("YYYY/MM/DD HH:mm:ss");
-            console.log(currentTime);
             const result = await this.Reserve.update({deleteTime: currentTime}, { where :  {id : req.params.reserveId } });
             if( result == 1) {
                 return res.status(200).json({
@@ -286,7 +285,8 @@ module.exports = new class Admin extends ControllerModels {
                 customerName : item['person.fName'],
                 customerLastname : item['person.lName'],
                 customerUsername : item['person.username'],
-                customerPhone : item['person.phone']
+                customerPhone : item['person.phone'],
+                payment : item.payment
             }
         });
         return transformedData;
