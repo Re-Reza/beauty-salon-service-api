@@ -10,7 +10,7 @@ const path = require("path");
 
 app.use( cors( {
     //valid origins that are allowed to request api
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3001'],
     credentials:true,
     optionSuccessStatus:200,
     methods : ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
